@@ -27,6 +27,7 @@
                 <li class="nav-item"><a class="nav-link js-scroll-trigger" href="#experience">Experience</a></li>
                 <li class="nav-item"><a class="nav-link js-scroll-trigger" href="#education">Education</a></li>
                 <li class="nav-item"><a class="nav-link js-scroll-trigger" href="#projects">Projects</a></li>
+                <li class="nav-item"><a class="nav-link js-scroll-trigger" href="#blog">Blog</a></li>
             </ul>
         </div>
     </nav>
@@ -261,99 +262,162 @@
         <hr class="m-0" />
 
         <section class="resume-section" id="blog">
-            <div class="resume-section-content">
-                <h2 class="mb-5">Blog</h2>
-                
-                <div class="mb-4">
-                    <h3 class="mb-1">
-                        <a data-toggle="collapse" href="#post1" role="button" aria-expanded="false" aria-controls="post1">
-                            Sample Blog Post: Getting Started with 3D Printing
-                        </a>
-                    </h3>
-                    <div class="subheading mb-2">December 30, 2025 • 5 min read</div>
-                    <p class="mb-2">A brief introduction to my journey with 3D printing, the challenges I faced, and the solutions I developed...</p>
-                    
-                    <div class="collapse" id="post1">
-                        <hr class="my-3" />
-                        <h4>Introduction</h4>
-                        <p>
-                            When I first got into 3D printing, I quickly realized that the hobby came with unexpected challenges. 
-                            Beyond learning CAD design and understanding print settings, I had to deal with practical issues like 
-                            cable management, ventilation, and thermal concerns.
-                        </p>
+                    <div class="resume-section-content">
+                        <h2 class="mb-5">Blog</h2>
                         
-                        <h4>The Ventilation Challenge</h4>
-                        <p>
-                            One of my first major projects was designing ventilation panels to address VOCs from my 3D printer. 
-                            Many people underestimate the importance of proper ventilation when printing with materials like ABS or PETG. 
-                            I designed custom window-mounted panels that effectively direct harmful emissions outside while maintaining 
-                            a sealed environment.
-                        </p>
+                        <!-- 
+                        ========================================
+                        BLOG POST TEMPLATE - COPY THIS TO ADD NEW POSTS
+                        ========================================
                         
-                        <h4>Computer Cooling Solution</h4>
-                        <p>
-                            My workspace gets warm, especially during long print jobs. I developed a custom duct adapter that redirects 
-                            my computer's exhaust into my ventilation system. This simple solution improved my workspace comfort 
-                            significantly and shows how 3D printing can solve everyday problems.
-                        </p>
+                        Instructions:
+                        1. Copy the template below
+                        2. Paste it at the TOP of the blog section (so newest posts appear first)
+                        3. Update the post ID (post3, post4, etc.) - must be unique for each post
+                        4. Replace the title, date, reading time, and preview text
+                        5. Add your full post content inside the collapse div
+                        6. Remember to add <hr class="m-0" /> between posts
                         
-                        <h4>Key Takeaways</h4>
-                        <p>
-                            3D printing isn't just about making objects—it's about solving real problems with custom solutions. 
-                            Whether it's organizing cables with a Stråla lamp box or improving air quality with ventilation panels, 
-                            the ability to design and fabricate custom parts opens up endless possibilities.
-                        </p>
+                        Template:
+                        
+                        <div class="mb-4">
+                            <h3 class="mb-1">
+                                <a data-toggle="collapse" href="#postX" role="button" aria-expanded="false" aria-controls="postX">
+                                    Your Post Title Here
+                                </a>
+                            </h3>
+                            <div class="subheading mb-2">January 15, 2026 • 6 min read</div>
+                            <p class="mb-2">Brief preview/excerpt text that appears before expanding (1-2 sentences)...</p>
+                            
+                            <div class="collapse" id="postX">
+                                <hr class="my-3" />
+                                <h4>Section Title</h4>
+                                <p>
+                                    Your paragraph content here. You can include multiple paragraphs,
+                                    use <strong>bold text</strong>, <em>italic text</em>, and more.
+                                </p>
+                                
+                                <h4>Another Section</h4>
+                                <p>More content...</p>
+                                
+                                <ul>
+                                    <li>Bullet point 1</li>
+                                    <li>Bullet point 2</li>
+                                    <li>Bullet point 3</li>
+                                </ul>
+                                
+                                <h4>Conclusion</h4>
+                                <p>Final thoughts...</p>
+                            </div>
+                        </div>
+                        
+                        <hr class="m-0" />
+                        
+                        IMPORTANT NOTES:
+                        - Each post MUST have a unique ID (postX where X is a number)
+                        - The href="#postX" and id="postX" must match exactly
+                        - Posts are collapsed by default; click title to expand
+                        - Add <hr class="m-0" /> between posts for visual separation
+                        - You can use HTML formatting: <h4> for subheadings, <p> for paragraphs, 
+                          <ul> and <li> for lists, <strong> for bold, <em> for italic
+                        - Keep preview text brief (1-2 sentences max)
+                        - Estimate reading time: ~200 words per minute
+                        
+                        ========================================
+                        END OF TEMPLATE
+                        ========================================
+                        -->
+                        
+                        <div class="mb-4">
+                            <h3 class="mb-1">
+                                <a data-toggle="collapse" href="#post1" role="button" aria-expanded="false" aria-controls="post1">
+                                    Sample Blog Post: Getting Started with 3D Printing
+                                </a>
+                            </h3>
+                            <div class="subheading mb-2">December 30, 2025 • 5 min read</div>
+                            <p class="mb-2">A brief introduction to my journey with 3D printing, the challenges I faced, and the solutions I developed...</p>
+                            
+                            <div class="collapse" id="post1">
+                                <hr class="my-3" />
+                                <h4>Introduction</h4>
+                                <p>
+                                    When I first got into 3D printing, I quickly realized that the hobby came with unexpected challenges. 
+                                    Beyond learning CAD design and understanding print settings, I had to deal with practical issues like 
+                                    cable management, ventilation, and thermal concerns.
+                                </p>
+                                
+                                <h4>The Ventilation Challenge</h4>
+                                <p>
+                                    One of my first major projects was designing ventilation panels to address VOCs from my 3D printer. 
+                                    Many people underestimate the importance of proper ventilation when printing with materials like ABS or PETG. 
+                                    I designed custom window-mounted panels that effectively direct harmful emissions outside while maintaining 
+                                    a sealed environment.
+                                </p>
+                                
+                                <h4>Computer Cooling Solution</h4>
+                                <p>
+                                    My workspace gets warm, especially during long print jobs. I developed a custom duct adapter that redirects 
+                                    my computer's exhaust into my ventilation system. This simple solution improved my workspace comfort 
+                                    significantly and shows how 3D printing can solve everyday problems.
+                                </p>
+                                
+                                <h4>Key Takeaways</h4>
+                                <p>
+                                    3D printing isn't just about making objects—it's about solving real problems with custom solutions. 
+                                    Whether it's organizing cables with a Stråla lamp box or improving air quality with ventilation panels, 
+                                    the ability to design and fabricate custom parts opens up endless possibilities.
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <hr class="m-0" />
+                        
+                        <div class="mb-4">
+                            <h3 class="mb-1">
+                                <a data-toggle="collapse" href="#post2" role="button" aria-expanded="false" aria-controls="post2">
+                                    Sample Blog Post: Lessons from Matched Betting
+                                </a>
+                            </h3>
+                            <div class="subheading mb-2">December 15, 2025 • 7 min read</div>
+                            <p class="mb-2">How I generated $11,500 through sharp betting strategies and what I learned about risk management...</p>
+                            
+                            <div class="collapse" id="post2">
+                                <hr class="my-3" />
+                                <h4>Understanding Matched Betting</h4>
+                                <p>
+                                    Matched betting is often misunderstood as gambling, but it's actually a mathematical approach to 
+                                    extracting value from bookmaker promotions. By placing offsetting bets, you can guarantee a profit 
+                                    regardless of the outcome.
+                                </p>
+                                
+                                <h4>Building the Tracking System</h4>
+                                <p>
+                                    Success in matched betting requires meticulous record-keeping. I built a comprehensive spreadsheet 
+                                    system that tracks every bet, promotion, and outcome across multiple sportsbooks. This systematic 
+                                    approach has helped me generate $11,500 in profit while minimizing risk.
+                                </p>
+                                
+                                <h4>Risk Management Principles</h4>
+                                <p>
+                                    The key to successful matched betting is treating it like a business, not gambling. You need to:
+                                </p>
+                                <ul>
+                                    <li>Track every transaction meticulously</li>
+                                    <li>Understand probability and expected value</li>
+                                    <li>Manage bankroll effectively</li>
+                                    <li>Stay disciplined and avoid emotional decisions</li>
+                                </ul>
+                                
+                                <h4>Conclusion</h4>
+                                <p>
+                                    Matched betting taught me valuable lessons about risk management, probability, and the importance 
+                                    of systematic approaches—skills that translate directly to my work as a healthcare economics analyst.
+                                </p>
+                            </div>
+                        </div>
                     </div>
-                </div>
-                
-                <hr class="m-0" />
-                
-                <div class="mb-4">
-                    <h3 class="mb-1">
-                        <a data-toggle="collapse" href="#post2" role="button" aria-expanded="false" aria-controls="post2">
-                            Sample Blog Post: Lessons from Matched Betting
-                        </a>
-                    </h3>
-                    <div class="subheading mb-2">December 15, 2025 • 7 min read</div>
-                    <p class="mb-2">How I generated $11,500 through sharp betting strategies and what I learned about risk management...</p>
-                    
-                    <div class="collapse" id="post2">
-                        <hr class="my-3" />
-                        <h4>Understanding Matched Betting</h4>
-                        <p>
-                            Matched betting is often misunderstood as gambling, but it's actually a mathematical approach to 
-                            extracting value from bookmaker promotions. By placing offsetting bets, you can guarantee a profit 
-                            regardless of the outcome.
-                        </p>
-                        
-                        <h4>Building the Tracking System</h4>
-                        <p>
-                            Success in matched betting requires meticulous record-keeping. I built a comprehensive spreadsheet 
-                            system that tracks every bet, promotion, and outcome across multiple sportsbooks. This systematic 
-                            approach has helped me generate $11,500 in profit while minimizing risk.
-                        </p>
-                        
-                        <h4>Risk Management Principles</h4>
-                        <p>
-                            The key to successful matched betting is to treat it like a business, not gambling. You need to:
-                        </p>
-                        <ul>
-                            <li>Track every transaction meticulously</li>
-                            <li>Understand probability and expected value</li>
-                            <li>Manage bankroll effectively</li>
-                            <li>Stay disciplined and avoid emotional decisions</li>
-                        </ul>
-                        
-                        <h4>Conclusion</h4>
-                        <p>
-                            Matched betting taught me valuable lessons about risk management, probability, and the importance 
-                            of systematic approaches—skills that translate directly to my work as a healthcare economics analyst.
-                        </p>
-                    </div>
-                </div>
+                </section>
             </div>
-        </section>
-    </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.bundle.min.js"></script>
