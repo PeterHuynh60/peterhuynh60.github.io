@@ -259,6 +259,176 @@
             </div>
         </section>
 
+        <!-- Add this section to your main index.html, after Projects and before Blog -->
+
+        <hr class="m-0" />
+        
+        <section class="resume-section" id="dashboard">
+            <div class="resume-section-content">
+                <h2 class="mb-5">Betting Dashboard</h2>
+                
+                <div class="row mb-4">
+                    <div class="col-lg-3 col-md-6 mb-4">
+                        <div class="card border-success">
+                            <div class="card-body text-center">
+                                <h5 class="card-title text-muted mb-2">Total Earnings</h5>
+                                <h2 class="text-success mb-0" id="summary-total-earnings">$0.00</h2>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-3 col-md-6 mb-4">
+                        <div class="card border-primary">
+                            <div class="card-body text-center">
+                                <h5 class="card-title text-muted mb-2">Total Bets</h5>
+                                <h2 class="text-primary mb-0" id="summary-total-bets">0</h2>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-3 col-md-6 mb-4">
+                        <div class="card border-info">
+                            <div class="card-body text-center">
+                                <h5 class="card-title text-muted mb-2">Win Rate</h5>
+                                <h2 class="text-info mb-0" id="summary-win-rate">0%</h2>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-3 col-md-6 mb-4">
+                        <div class="card border-warning">
+                            <div class="card-body text-center">
+                                <h5 class="card-title text-muted mb-2">Best Win</h5>
+                                <h2 class="text-warning mb-0" id="summary-best-win">$0.00</h2>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title mb-3">Profit Over Time</h5>
+                                <canvas id="summary-chart" height="80"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="text-center">
+                    <a href="dashboard.html" class="btn btn-primary btn-lg">View Full Dashboard</a>
+                </div>
+            </div>
+        </section>
+        
+        <script>
+        // Summary Dashboard JavaScript
+        (async function() {
+            try {
+                // Fetch betting data from storage
+                const result = await window.storage.list('bet:');
+                
+                if (!result || !result.keys || result.keys.length === 0) {
+                    console.log('No betting data found');
+                    return;
+                }
+                
+                // Fetch all bets
+                const bets = [];
+                for (const key of result.keys) {
+                    try {
+                        const betResult = await window.storage.get(key);
+                        if (betResult && betResult.value) {
+                            const bet = JSON.parse(betResult.value);
+                            bets.push(bet);
+                        }
+                    } catch (err) {
+                        console.error('Error fetching bet:', err);
+                    }
+                }
+                
+                if (bets.length === 0) {
+                    return;
+                }
+                
+                // Calculate statistics
+                const totalEarnings = bets.reduce((sum, bet) => sum + (bet.profit || 0), 0);
+                const totalBets = bets.length;
+                const winningBets = bets.filter(bet => (bet.profit || 0) > 0).length;
+                const winRate = totalBets > 0 ? ((winningBets / totalBets) * 100).toFixed(1) : 0;
+                const bestWin = Math.max(...bets.map(bet => bet.profit || 0), 0);
+                
+                // Update display
+                document.getElementById('summary-total-earnings').textContent = 
+                    '$' + totalEarnings.toFixed(2);
+                document.getElementById('summary-total-bets').textContent = totalBets;
+                document.getElementById('summary-win-rate').textContent = winRate + '%';
+                document.getElementById('summary-best-win').textContent = '$' + bestWin.toFixed(2);
+                
+                // Sort bets by date
+                bets.sort((a, b) => new Date(a.date) - new Date(b.date));
+                
+                // Create cumulative profit data for chart
+                let cumulativeProfit = 0;
+                const chartData = bets.map(bet => {
+                    cumulativeProfit += bet.profit || 0;
+                    return {
+                        date: bet.date,
+                        profit: cumulativeProfit
+                    };
+                });
+                
+                // Create chart
+                const ctx = document.getElementById('summary-chart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: chartData.map(d => new Date(d.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })),
+                        datasets: [{
+                            label: 'Cumulative Profit',
+                            data: chartData.map(d => d.profit),
+                            borderColor: '#28a745',
+                            backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    callback: function(value) {
+                                        return '$' + value.toFixed(0);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+                
+            } catch (error) {
+                console.error('Error loading summary dashboard:', error);
+            }
+        })();
+        </script>
+        
+        <!-- Add Chart.js library before the closing body tag if not already included -->
+        <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+        
+        <!-- Also add "Dashboard" to your navigation menu -->
+        <!-- In the navbar, add this line with the other nav items:
+        <li class="nav-item"><a class="nav-link js-scroll-trigger" href="#dashboard">Dashboard</a></li>
+        -->
+
         <hr class="m-0" />
 
         <section class="resume-section" id="blog">
