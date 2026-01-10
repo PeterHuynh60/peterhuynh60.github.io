@@ -397,16 +397,22 @@
                 // Sort bets by date
                 completedBets.sort((a, b) => new Date(a.date) - new Date(b.date));
                 
-                // Create cumulative profit data for chart
+                // Create cumulative profit data for chart (starting at 0,0)
                 let cumulativeProfit = 0;
-                const chartData = completedBets.map(bet => {
-                    cumulativeProfit += bet.profit || 0;
-                    return {
+                const chartData = [{ date: null, profit: 0 }]; // Start at (0,0)
+                
+                completedBets.forEach(bet => {
+                    if (bet.bonusBet) {
+                        // For bonus bets, profit = payout
+                        cumulativeProfit += bet.payout || 0;
+                    } else {
+                        cumulativeProfit += bet.profit || 0;
+                    }
+                    chartData.push({
                         date: bet.date,
                         profit: cumulativeProfit
-                    };
+                    });
                 });
-                
                 // Helper function to format dates
                 function formatDateForDisplay(dateString) {
                     const [year, month, day] = dateString.split('-');
@@ -419,7 +425,7 @@
                 new Chart(ctx, {
                     type: 'line',
                     data: {
-                        labels: chartData.map(d => formatDateForDisplay(d.date)),
+                        labels: chartData.map((d, i) => i === 0 ? 'Start' : formatDateForDisplay(d.date)),
                         datasets: [{
                             label: 'Cumulative Profit',
                             data: chartData.map(d => d.profit),
