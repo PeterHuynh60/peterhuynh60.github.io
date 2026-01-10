@@ -11,6 +11,9 @@
     <link href="https://fonts.googleapis.com/css?family=Saira+Extra+Condensed:500,700" rel="stylesheet" type="text/css" />
     <link href="https://fonts.googleapis.com/css?family=Muli:400,400i,800,800i" rel="stylesheet" type="text/css" />
     <link href="css/styles.css" rel="stylesheet" />
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 </head>
 <body id="page-top">
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top" id="sideNav">
@@ -273,7 +276,7 @@
                         <div class="card border-success">
                             <div class="card-body text-center">
                                 <h5 class="card-title text-muted mb-2">Total Earnings</h5>
-                                <h2 class="text-success mb-0" id="summary-total-earnings">$0.00</h2>
+                                <h2 class="text-success mb-0" id="summary-total-earnings">Loading...</h2>
                             </div>
                         </div>
                     </div>
@@ -282,7 +285,7 @@
                         <div class="card border-primary">
                             <div class="card-body text-center">
                                 <h5 class="card-title text-muted mb-2">Total Bets</h5>
-                                <h2 class="text-primary mb-0" id="summary-total-bets">0</h2>
+                                <h2 class="text-primary mb-0" id="summary-total-bets">Loading...</h2>
                             </div>
                         </div>
                     </div>
@@ -291,7 +294,7 @@
                         <div class="card border-info">
                             <div class="card-body text-center">
                                 <h5 class="card-title text-muted mb-2">Win Rate</h5>
-                                <h2 class="text-info mb-0" id="summary-win-rate">0%</h2>
+                                <h2 class="text-info mb-0" id="summary-win-rate">Loading...</h2>
                             </div>
                         </div>
                     </div>
@@ -300,7 +303,7 @@
                         <div class="card border-warning">
                             <div class="card-body text-center">
                                 <h5 class="card-title text-muted mb-2">Best Win</h5>
-                                <h2 class="text-warning mb-0" id="summary-best-win">$0.00</h2>
+                                <h2 class="text-warning mb-0" id="summary-best-win">Loading...</h2>
                             </div>
                         </div>
                     </div>
@@ -322,57 +325,73 @@
                 </div>
             </div>
         </section>
-        
         <script>
+        // Firebase Configuration
+        const firebaseConfig = {
+          apiKey: "AIzaSyBLj4AYOc39hIaFAPKQrumsifP7bbyJ5To",
+          authDomain: "betting-dashboard-c224e.firebaseapp.com",
+          projectId: "betting-dashboard-c224e",
+          storageBucket: "betting-dashboard-c224e.firebasestorage.app",
+          messagingSenderId: "416492918120",
+          appId: "1:416492918120:web:e52afea521a508a89cf2dd"
+        };
+        
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        
         // Summary Dashboard JavaScript
         (async function() {
             try {
-                // Fetch betting data from storage
-                const result = await window.storage.list('bet:');
+                // Fetch all bets from Firestore
+                const snapshot = await db.collection('bets').get();
                 
-                if (!result || !result.keys || result.keys.length === 0) {
+                if (snapshot.empty) {
                     console.log('No betting data found');
+                    document.getElementById('summary-total-earnings').textContent = '$0.00';
+                    document.getElementById('summary-total-bets').textContent = '0';
+                    document.getElementById('summary-win-rate').textContent = '0%';
+                    document.getElementById('summary-best-win').textContent = '0.00';
                     return;
                 }
                 
-                // Fetch all bets
+                // Parse bets from Firestore
                 const bets = [];
-                for (const key of result.keys) {
+                snapshot.forEach(doc => {
                     try {
-                        const betResult = await window.storage.get(key);
-                        if (betResult && betResult.value) {
-                            const bet = JSON.parse(betResult.value);
-                            bets.push(bet);
-                        }
+                        const bet = JSON.parse(doc.data().value);
+                        bets.push(bet);
                     } catch (err) {
-                        console.error('Error fetching bet:', err);
+                        console.error('Error parsing bet:', err);
                     }
-                }
+                });
                 
                 if (bets.length === 0) {
                     return;
                 }
                 
+                // Filter only completed bets for statistics
+                const completedBets = bets.filter(bet => bet.result !== 'Pending');
+                
                 // Calculate statistics
-                const totalEarnings = bets.reduce((sum, bet) => sum + (bet.profit || 0), 0);
-                const totalBets = bets.length;
-                const winningBets = bets.filter(bet => (bet.profit || 0) > 0).length;
+                const totalEarnings = completedBets.reduce((sum, bet) => sum + (bet.profit || 0), 0);
+                const totalBets = completedBets.length;
+                const winningBets = completedBets.filter(bet => bet.result === 'Won').length;
                 const winRate = totalBets > 0 ? ((winningBets / totalBets) * 100).toFixed(1) : 0;
-                const bestWin = Math.max(...bets.map(bet => bet.profit || 0), 0);
+                const bestWin = Math.max(...completedBets.map(bet => bet.profit || 0), 0);
                 
                 // Update display
-                document.getElementById('summary-total-earnings').textContent = 
-                    '$' + totalEarnings.toFixed(2);
+                document.getElementById('summary-total-earnings').textContent = '$' + totalEarnings.toFixed(2);
                 document.getElementById('summary-total-bets').textContent = totalBets;
                 document.getElementById('summary-win-rate').textContent = winRate + '%';
                 document.getElementById('summary-best-win').textContent = '$' + bestWin.toFixed(2);
                 
                 // Sort bets by date
-                bets.sort((a, b) => new Date(a.date) - new Date(b.date));
+                completedBets.sort((a, b) => new Date(a.date) - new Date(b.date));
                 
                 // Create cumulative profit data for chart
                 let cumulativeProfit = 0;
-                const chartData = bets.map(bet => {
+                const chartData = completedBets.map(bet => {
                     cumulativeProfit += bet.profit || 0;
                     return {
                         date: bet.date,
@@ -380,12 +399,19 @@
                     };
                 });
                 
+                // Helper function to format dates
+                function formatDateForDisplay(dateString) {
+                    const [year, month, day] = dateString.split('-');
+                    const date = new Date(year, month - 1, day);
+                    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                }
+                
                 // Create chart
                 const ctx = document.getElementById('summary-chart').getContext('2d');
                 new Chart(ctx, {
                     type: 'line',
                     data: {
-                        labels: chartData.map(d => new Date(d.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })),
+                        labels: chartData.map(d => formatDateForDisplay(d.date)),
                         datasets: [{
                             label: 'Cumulative Profit',
                             data: chartData.map(d => d.profit),
@@ -404,6 +430,9 @@
                             }
                         },
                         scales: {
+                            x: {
+                                display: false
+                            },
                             y: {
                                 beginAtZero: true,
                                 ticks: {
@@ -418,6 +447,10 @@
                 
             } catch (error) {
                 console.error('Error loading summary dashboard:', error);
+                document.getElementById('summary-total-earnings').textContent = 'Error';
+                document.getElementById('summary-total-bets').textContent = 'Error';
+                document.getElementById('summary-win-rate').textContent = 'Error';
+                document.getElementById('summary-best-win').textContent = 'Error';
             }
         })();
         </script>
