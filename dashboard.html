@@ -1,0 +1,1060 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <title>Betting Dashboard - Peter Huynh</title>
+    <link rel="icon" type="image/x-icon" href="assets/img/favicon.ico" />
+    <link href="https://fonts.googleapis.com/css?family=Saira+Extra+Condensed:500,700" rel="stylesheet" type="text/css" />
+    <link href="https://fonts.googleapis.com/css?family=Muli:400,400i,800,800i" rel="stylesheet" type="text/css" />
+    <link href="css/styles.css" rel="stylesheet" />
+    
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    
+    <style>
+        body {
+            padding-top: 56px;
+            font-family: "Muli", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            color: #212529;
+            background-color: #77CE93;
+        }
+        
+        .container-fluid {
+            padding: 2rem 1.5rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .dashboard-header {
+            background-color: #55c278;
+            color: white;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .dashboard-header h1 {
+            font-family: "Saira Extra Condensed", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-bottom: 0.25rem;
+            font-size: 2rem;
+        }
+        
+        .dashboard-header p {
+            margin-bottom: 0;
+            opacity: 0.9;
+        }
+        
+        /* Compact Stats Row */
+        .stats-row {
+            background: white;
+            border: 1px solid #dee2e6;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border-radius: 8px;
+        }
+        
+        .stat-item {
+            text-align: center;
+            padding: 0.5rem;
+        }
+        
+        .stat-item h6 {
+            font-family: "Muli", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.05rem;
+            color: #6c757d;
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+        }
+        
+        .stat-item h2 {
+            font-family: "Saira Extra Condensed", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            font-weight: 700;
+            font-size: 1.75rem;
+            margin-bottom: 0;
+            color: #55c278;
+        }
+        
+        .card {
+            margin-bottom: 1.5rem;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            background-color: white;
+        }
+        
+        .card-body {
+            padding: 1.25rem;
+            text-align: center;
+        }
+        
+        .card-title {
+            font-family: "Saira Extra Condensed", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #55c278;
+            font-size: 1rem;
+        }
+        
+        .bet-table, .form-section {
+            background: white;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .bet-table h4, .form-section h4 {
+            font-family: "Saira Extra Condensed", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #55c278;
+            margin-bottom: 1.25rem;
+            font-size: 1.25rem;
+            text-align: center;
+        }
+        
+        .table {
+            font-family: "Muli", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            font-size: 0.9rem;
+            color: #212529;
+            text-align: center;
+        }
+        
+        .table thead th {
+            border-top: none;
+            border-bottom: 2px solid #dee2e6;
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.05rem;
+            color: #212529;
+            background-color: #fff;
+            text-align: center;
+        }
+        
+        .table tbody td {
+            text-align: center;
+            vertical-align: middle;
+        }
+        
+        .badge-bonus {
+            background-color: #ffc107;
+            color: #000;
+        }
+        
+        .badge-boost {
+            background-color: #17a2b8;
+            color: #fff;
+        }
+        
+        .badge-won {
+            background-color: #28a745;
+            color: #fff;
+        }
+        
+        .badge-lost {
+            background-color: #dc3545;
+            color: #fff;
+        }
+        
+        .badge-push {
+            background-color: #6c757d;
+            color: #fff;
+        }
+        
+        .badge-pending {
+            background-color: #ffc107;
+            color: #000;
+        }
+        
+        .badge-secondary {
+            background-color: #6c757d;
+            color: #fff;
+        }
+        
+        .profit-positive {
+            color: #28a745;
+            font-weight: bold;
+        }
+        
+        .profit-negative {
+            color: #dc3545;
+            font-weight: bold;
+        }
+        
+        .back-link {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            z-index: 1000;
+            background-color: #55c278;
+            border: none;
+            font-family: "Muli", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            font-weight: 400;
+            text-transform: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            color: white;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .back-link:hover {
+            background-color: #48a869;
+            color: white;
+            text-decoration: none;
+        }
+        
+        .btn-primary {
+            background-color: #55c278;
+            border-color: #55c278;
+            font-family: "Muli", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            font-weight: 400;
+            text-transform: none;
+        }
+        
+        .btn-primary:hover {
+            background-color: #48a869;
+            border-color: #48a869;
+        }
+        
+        .btn-secondary {
+            background-color: #6c757d;
+            border-color: #6c757d;
+            font-family: "Muli", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            font-weight: 400;
+            text-transform: none;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #5a6268;
+            border-color: #545b62;
+        }
+        
+        .btn-success {
+            background-color: #28a745;
+            border-color: #28a745;
+            font-family: "Muli", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            font-weight: 400;
+        }
+        
+        .btn-danger {
+            background-color: #dc3545;
+            border-color: #dc3545;
+            font-family: "Muli", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            font-weight: 400;
+        }
+        
+        label {
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.05rem;
+            color: #6c757d;
+            margin-bottom: 0.5rem;
+            display: block;
+            text-align: center;
+        }
+        
+        .form-control {
+            border: 1px solid #ced4da;
+            font-size: 0.9rem;
+            text-align: center;
+            font-family: "Muli", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            padding: 0.75rem 0.75rem;
+            height: auto;
+        }
+        
+        .form-control::placeholder {
+            font-family: "Muli", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            color: #6c757d;
+            opacity: 0.6;
+        }
+        
+        .form-check-input {
+            margin-top: 0;
+            position: relative;
+            margin-right: 0.5rem;
+            border: 2px solid #ced4da;
+        }
+        
+        .form-check-input:checked {
+            background-color: #55c278;
+            border-color: #55c278;
+        }
+        
+        .form-check-input:focus {
+            border-color: #55c278;
+            box-shadow: 0 0 0 0.2rem rgba(85, 194, 120, 0.25);
+        }
+        
+        .form-check-label {
+            margin-bottom: 0;
+            padding-top: 0;
+        }
+        
+        .form-control:focus {
+            border-color: #55c278;
+            box-shadow: 0 0 0 0.2rem rgba(85, 194, 120, 0.25);
+        }
+        
+        .mb-3 {
+            margin-bottom: 1.5rem !important;
+        }
+        
+        .form-control:focus {
+            border-color: #55c278;
+            box-shadow: 0 0 0 0.2rem rgba(85, 194, 120, 0.25);
+        }
+        
+        .row.mb-4 {
+            margin-bottom: 1.5rem !important;
+        }
+    </style>
+</head>
+<body>
+    <a href="index.html" class="btn btn-dark back-link">← Back to Main Site</a>
+    
+    <div class="container-fluid">
+        <div class="dashboard-header">
+            <h1 class="mb-2">Betting Dashboard</h1>
+            <p class="mb-0">Track your sharp betting performance and earnings</p>
+        </div>
+        
+        <!-- Statistics Cards -->
+        <div class="stats-row">
+            <div class="row">
+                <div class="col-lg-3 col-md-6 col-6">
+                    <div class="stat-item earnings">
+                        <h6>Total Earnings</h6>
+                        <h2 id="total-earnings">$0.00</h2>
+                    </div>
+                </div>
+                
+                <div class="col-lg-3 col-md-6 col-6">
+                    <div class="stat-item bets">
+                        <h6>Total Bets</h6>
+                        <h2 id="total-bets">0</h2>
+                    </div>
+                </div>
+                
+                <div class="col-lg-3 col-md-6 col-6">
+                    <div class="stat-item winrate">
+                        <h6>Win Rate</h6>
+                        <h2 id="win-rate">0%</h2>
+                    </div>
+                </div>
+                
+                <div class="col-lg-3 col-md-6 col-6">
+                    <div class="stat-item avgprofit">
+                        <h6>Avg Profit</h6>
+                        <h2 id="avg-profit">$0.00</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Charts -->
+        <div class="row mb-4">
+            <div class="col-lg-8 mb-4">
+                <div class="card border-0">
+                    <div class="card-body">
+                        <h5 class="card-title mb-3">Cumulative Profit Over Time</h5>
+                        <canvas id="profit-chart"></canvas>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 mb-4">
+                <div class="card border-0">
+                    <div class="card-body">
+                        <h5 class="card-title mb-3">Profit by Strategy</h5>
+                        <canvas id="strategy-chart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Add New Bet Form -->
+        <div class="form-section">
+            <h4 class="mb-4">Add New Bet</h4>
+            
+            <!-- Password Protection -->
+            <div id="password-prompt">
+                <p class="text-center mb-3">Enter password to add or manage bets:</p>
+                <div class="row justify-content-center">
+                    <div class="col-md-4">
+                        <input type="password" class="form-control mb-3" id="admin-password" placeholder="Password">
+                        <button type="button" class="btn btn-primary" id="unlock-btn">Unlock</button>
+                        <p class="text-danger text-center mt-2" id="password-error" style="display: none;">Incorrect password</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Form (hidden by default) -->
+            <form id="bet-form" style="display: none;">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="bet-date">Date</label>
+                        <input type="date" class="form-control" id="bet-date" required>
+                    </div>
+                    
+                    <div class="col-md-6 mb-3">
+                        <label for="bet-sportsbook">Sportsbook</label>
+                        <input type="text" class="form-control" id="bet-sportsbook" placeholder="e.g., DraftKings" required>
+                    </div>
+                    
+                    <div class="col-md-6 mb-3" id="single-sport-container">
+                        <label for="bet-sport">Sport/Event</label>
+                        <input type="text" class="form-control" id="bet-sport" placeholder="e.g., NFL - Chiefs vs Bills">
+                    </div>
+                    
+                    <div class="col-md-6 mb-3" id="parlay-legs-container" style="display: none;">
+                        <label>Parlay Legs</label>
+                        <div id="parlay-legs">
+                            <div class="parlay-leg mb-2">
+                                <input type="text" class="form-control parlay-leg-input" placeholder="Sport/Event (e.g., NBA: Lakers ML)">
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-sm btn-primary mt-2" id="add-parlay-leg">Add Leg</button>
+                        <button type="button" class="btn btn-sm btn-danger mt-2 ml-2" id="remove-parlay-leg" style="display: none;">- Remove Leg</button>
+                    </div>
+                    
+                    <div class="col-md-6 mb-3">
+                        <label for="bet-type">Bet Type</label>
+                        <select class="form-control" id="bet-type" required>
+                            <option value="">Select type...</option>
+                            <option value="Straight">Straight</option>
+                            <option value="Parlay">Parlay</option>
+                            <option value="Promotion Harvesting">Promotion Harvesting</option>
+                            <option value="+EV Betting">+EV Betting</option>
+                            <option value="Arbitrage">Arbitrage</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    
+                    <div class="col-md-4 mb-3">
+                        <label for="bet-wager">Wager ($)</label>
+                        <input type="number" step="0.01" class="form-control" id="bet-wager" placeholder="100.00" required>
+                    </div>
+                    
+                    <div class="col-md-4 mb-3">
+                        <label for="bet-odds">Odds (American)</label>
+                        <input type="text" class="form-control" id="bet-odds" placeholder="-110 or +150" required>
+                    </div>
+                    
+                    <div class="col-md-4 mb-3">
+                        <label for="bet-payout">Payout ($)</label>
+                        <input type="number" step="0.01" class="form-control" id="bet-payout" placeholder="191.00" required>
+                    </div>
+                    
+                    <div class="col-md-4 mb-3">
+                        <label for="bet-result">Result</label>
+                        <select class="form-control" id="bet-result" required>
+                            <option value="">Select result...</option>
+                            <option value="Won">Won</option>
+                            <option value="Lost">Lost</option>
+                            <option value="Push">Push</option>
+                            <option value="Pending">Pending</option>
+                        </select>
+                    </div>
+                    
+                    <div class="col-md-12 mb-3">
+                        <label>Flags</label>
+                        <div class="d-flex justify-content-center align-items-center">
+                            <div class="form-check d-flex align-items-center mr-4">
+                                <label class="form-check-label mr-2" for="bet-bonus" style="text-transform: none; font-weight: 400; color: #212529; font-size: 0.9rem;">Bonus Bet</label>
+                                <input class="form-check-input" type="checkbox" id="bet-bonus">
+                            </div>
+                            <div class="form-check d-flex align-items-center">
+                                <label class="form-check-label mr-2" for="bet-boost" style="text-transform: none; font-weight: 400; color: #212529; font-size: 0.9rem;">Profit Boost</label>
+                                <input class="form-check-input" type="checkbox" id="bet-boost">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-12 mb-3">
+                        <label for="bet-notes">Notes (Optional)</label>
+                        <textarea class="form-control" id="bet-notes" rows="2" placeholder="Any additional notes..."></textarea>
+                    </div>
+                </div>
+                
+                <div class="text-center mt-4">
+                    <button type="submit" class="btn btn-primary btn-lg">Add Bet</button>
+                </div>
+            </form>
+        </div>
+        
+        <!-- Pending Bets Section -->
+        <div class="bet-table mb-4">
+            <h4 class="mb-4">Pending Bets</h4>
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Sportsbook</th>
+                            <th>Sport/Event</th>
+                            <th>Type</th>
+                            <th>Wager</th>
+                            <th>Odds</th>
+                            <th>Expected Payout</th>
+                            <th>Flags</th>
+                            <th>Resolve</th>
+                        </tr>
+                    </thead>
+                    <tbody id="pending-bets">
+                        <tr>
+                            <td colspan="9" class="text-center text-muted">No pending bets</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- Completed Bet History Table -->
+        <div class="bet-table">
+            <h4 class="mb-4">Completed Bet History</h4>
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Sportsbook</th>
+                            <th>Sport/Event</th>
+                            <th>Type</th>
+                            <th>Wager</th>
+                            <th>Odds</th>
+                            <th>Payout</th>
+                            <th>Profit</th>
+                            <th>Result</th>
+                            <th>Flags</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="bet-history">
+                        <tr>
+                            <td colspan="11" class="text-center text-muted">No completed bets yet.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    
+    <script>
+        // ============================================
+        // FIREBASE CONFIGURATION
+        // ============================================
+        // TODO: Replace this with your Firebase config from the Firebase Console
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_PROJECT_ID.appspot.com",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+        
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        
+        // ============================================
+        // STORAGE WRAPPER (Firebase Firestore)
+        // ============================================
+        const storage = {
+            async get(key) {
+                try {
+                    const doc = await db.collection('bets').doc(key).get();
+                    if (doc.exists) {
+                        return { key: key, value: doc.data().value };
+                    }
+                    return null;
+                } catch (error) {
+                    console.error('Error getting document:', error);
+                    throw error;
+                }
+            },
+            
+            async set(key, value) {
+                try {
+                    await db.collection('bets').doc(key).set({ value: value });
+                    return { key: key, value: value };
+                } catch (error) {
+                    console.error('Error setting document:', error);
+                    throw error;
+                }
+            },
+            
+            async delete(key) {
+                try {
+                    await db.collection('bets').doc(key).delete();
+                    return { key: key, deleted: true };
+                } catch (error) {
+                    console.error('Error deleting document:', error);
+                    throw error;
+                }
+            },
+            
+            async list(prefix) {
+                try {
+                    const snapshot = await db.collection('bets').get();
+                    const keys = [];
+                    snapshot.forEach(doc => {
+                        if (!prefix || doc.id.startsWith(prefix)) {
+                            keys.push(doc.id);
+                        }
+                    });
+                    return { keys: keys };
+                } catch (error) {
+                    console.error('Error listing documents:', error);
+                    throw error;
+                }
+            }
+        };
+        
+        // ============================================
+        // DASHBOARD CODE
+        // ============================================
+        let profitChart, strategyChart;
+        let isUnlocked = false;
+        
+        // Password protection - CHANGE THIS PASSWORD!
+        const ADMIN_PASSWORD = "yourpassword123";
+        
+        // Set today's date as default
+        document.getElementById('bet-date').valueAsDate = new Date();
+        
+        // Handle password unlock
+        document.getElementById('unlock-btn').addEventListener('click', function() {
+            const enteredPassword = document.getElementById('admin-password').value;
+            if (enteredPassword === ADMIN_PASSWORD) {
+                isUnlocked = true;
+                document.getElementById('password-prompt').style.display = 'none';
+                document.getElementById('bet-form').style.display = 'block';
+                document.getElementById('password-error').style.display = 'none';
+            } else {
+                document.getElementById('password-error').style.display = 'block';
+            }
+        });
+        
+        // Allow Enter key to submit password
+        document.getElementById('admin-password').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                document.getElementById('unlock-btn').click();
+            }
+        });
+        
+        // Load dashboard data
+        async function loadDashboard() {
+            try {
+                const result = await storage.list('bet:');
+                
+                if (!result || !result.keys || result.keys.length === 0) {
+                    console.log('No betting data found');
+                    return;
+                }
+                
+                const bets = [];
+                for (const key of result.keys) {
+                    try {
+                        const betResult = await storage.get(key);
+                        if (betResult && betResult.value) {
+                            const bet = JSON.parse(betResult.value);
+                            bet.id = key;
+                            bets.push(bet);
+                        }
+                    } catch (err) {
+                        console.error('Error fetching bet:', err);
+                    }
+                }
+                
+                if (bets.length === 0) return;
+                
+                // Sort by date (newest first)
+                bets.sort((a, b) => new Date(b.date) - new Date(a.date));
+                
+                updateStatistics(bets);
+                updateCharts(bets);
+                updatePendingTable(bets);
+                updateTable(bets);
+                
+            } catch (error) {
+                console.error('Error loading dashboard:', error);
+                alert('Error loading dashboard data');
+            }
+        }
+        
+        function updateStatistics(bets) {
+            // Only count completed bets for statistics
+            const completedBets = bets.filter(bet => bet.result !== 'Pending');
+            const totalEarnings = completedBets.reduce((sum, bet) => sum + bet.profit, 0);
+            const totalBets = completedBets.length;
+            const winningBets = completedBets.filter(bet => bet.result === 'Won').length;
+            const winRate = totalBets > 0 ? ((winningBets / totalBets) * 100).toFixed(1) : 0;
+            const avgProfit = totalBets > 0 ? (totalEarnings / totalBets) : 0;
+            
+            document.getElementById('total-earnings').textContent = '$' + totalEarnings.toFixed(2);
+            document.getElementById('total-bets').textContent = totalBets;
+            document.getElementById('win-rate').textContent = winRate + '%';
+            document.getElementById('avg-profit').textContent = '$' + avgProfit.toFixed(2);
+        }
+        
+        function updatePendingTable(bets) {
+            const pendingBets = bets.filter(bet => bet.result === 'Pending');
+            const tbody = document.getElementById('pending-bets');
+            
+            if (pendingBets.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="9" class="text-center text-muted">No pending bets</td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = pendingBets.map(bet => {
+                // Format sport/event - handle both string and array (parlay)
+                let sportDisplay;
+                if (Array.isArray(bet.sport)) {
+                    sportDisplay = bet.sport.map((leg, i) => `${i + 1}. ${leg}`).join('<br>');
+                } else {
+                    sportDisplay = bet.sport;
+                }
+                
+                return `
+                <tr>
+                    <td>${new Date(bet.date).toLocaleDateString('en-US')}</td>
+                    <td>${bet.sportsbook}</td>
+                    <td style="text-align: left; padding-left: 10px;">${sportDisplay}</td>
+                    <td><span class="badge badge-secondary">${bet.betType}</span></td>
+                    <td>$${bet.wager.toFixed(2)}</td>
+                    <td>${bet.odds}</td>
+                    <td>$${bet.payout.toFixed(2)}</td>
+                    <td>
+                        ${bet.bonusBet ? '<span class="badge badge-bonus">Bonus</span> ' : ''}
+                        ${bet.profitBoost ? '<span class="badge badge-boost">Boost</span>' : ''}
+                    </td>
+                    <td>
+                        <button class="btn btn-sm btn-success" onclick="resolveBet('${bet.id}', 'Won')">Won</button>
+                        <button class="btn btn-sm btn-danger" onclick="resolveBet('${bet.id}', 'Lost')">Lost</button>
+                        <button class="btn btn-sm btn-secondary" onclick="resolveBet('${bet.id}', 'Push')">Push</button>
+                    </td>
+                </tr>
+            `;
+            }).join('');
+        }
+        
+        function updateCharts(bets) {
+            // Only chart completed bets
+            const completedBets = bets.filter(bet => bet.result !== 'Pending');
+            const sortedBets = [...completedBets].sort((a, b) => new Date(a.date) - new Date(b.date));
+            
+            // Cumulative profit chart
+            let cumulativeProfit = 0;
+            const profitData = sortedBets.map(bet => {
+                cumulativeProfit += bet.profit;
+                return {
+                    date: bet.date,
+                    profit: cumulativeProfit
+                };
+            });
+            
+            const profitCtx = document.getElementById('profit-chart').getContext('2d');
+            
+            if (profitChart) profitChart.destroy();
+            
+            profitChart = new Chart(profitCtx, {
+                type: 'line',
+                data: {
+                    labels: profitData.map(d => new Date(d.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })),
+                    datasets: [{
+                        label: 'Cumulative Profit',
+                        data: profitData.map(d => d.profit),
+                        borderColor: '#28a745',
+                        backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            ticks: {
+                                callback: value => '$' + value.toFixed(0)
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // Strategy breakdown chart
+            const strategyTotals = {};
+            completedBets.forEach(bet => {
+                if (!strategyTotals[bet.betType]) {
+                    strategyTotals[bet.betType] = 0;
+                }
+                strategyTotals[bet.betType] += bet.profit;
+            });
+            
+            const strategyCtx = document.getElementById('strategy-chart').getContext('2d');
+            
+            if (strategyChart) strategyChart.destroy();
+            
+            strategyChart = new Chart(strategyCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(strategyTotals),
+                    datasets: [{
+                        data: Object.values(strategyTotals),
+                        backgroundColor: [
+                            '#667eea',
+                            '#764ba2',
+                            '#f093fb',
+                            '#4facfe',
+                            '#43e97b'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+        }
+        
+        function updateTable(bets) {
+            // Only show completed bets
+            const completedBets = bets.filter(bet => bet.result !== 'Pending');
+            const tbody = document.getElementById('bet-history');
+            
+            if (completedBets.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="11" class="text-center text-muted">No completed bets yet.</td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = completedBets.map(bet => {
+                // Format sport/event - handle both string and array (parlay)
+                let sportDisplay;
+                if (Array.isArray(bet.sport)) {
+                    sportDisplay = bet.sport.map((leg, i) => `${i + 1}. ${leg}`).join('<br>');
+                } else {
+                    sportDisplay = bet.sport;
+                }
+                
+                return `
+                <tr>
+                    <td>${new Date(bet.date).toLocaleDateString('en-US')}</td>
+                    <td>${bet.sportsbook}</td>
+                    <td style="text-align: left; padding-left: 10px;">${sportDisplay}</td>
+                    <td><span class="badge badge-secondary">${bet.betType}</span></td>
+                    <td>$${bet.wager.toFixed(2)}</td>
+                    <td>${bet.odds}</td>
+                    <td>$${bet.payout.toFixed(2)}</td>
+                    <td class="${bet.profit >= 0 ? 'profit-positive' : 'profit-negative'}">
+                        ${bet.profit >= 0 ? '+' : ''}$${bet.profit.toFixed(2)}
+                    </td>
+                    <td><span class="badge badge-${bet.result.toLowerCase()}">${bet.result}</span></td>
+                    <td>
+                        ${bet.bonusBet ? '<span class="badge badge-bonus">Bonus</span> ' : ''}
+                        ${bet.profitBoost ? '<span class="badge badge-boost">Boost</span>' : ''}
+                    </td>
+                    <td>
+                        <button class="btn btn-sm btn-danger" onclick="deleteBet('${bet.id}')">Delete</button>
+                    </td>
+                </tr>
+            `;
+            }).join('');
+        }
+        
+        // Add new bet
+        document.getElementById('bet-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const wager = parseFloat(document.getElementById('bet-wager').value);
+            const payout = parseFloat(document.getElementById('bet-payout').value);
+            const profit = payout - wager;
+            const betType = document.getElementById('bet-type').value;
+            
+            // Collect sport/event info based on bet type
+            let sportInfo;
+            if (betType === 'Parlay') {
+                const parlayInputs = document.querySelectorAll('.parlay-leg-input');
+                sportInfo = Array.from(parlayInputs)
+                    .map(input => input.value.trim())
+                    .filter(val => val !== '');
+                
+                if (sportInfo.length === 0) {
+                    alert('Please add at least one parlay leg');
+                    return;
+                }
+            } else {
+                sportInfo = document.getElementById('bet-sport').value;
+                if (!sportInfo) {
+                    alert('Please enter a sport/event');
+                    return;
+                }
+            }
+            
+            const bet = {
+                date: document.getElementById('bet-date').value,
+                sportsbook: document.getElementById('bet-sportsbook').value,
+                sport: sportInfo, // Will be string for single bets, array for parlays
+                betType: betType,
+                wager: wager,
+                odds: document.getElementById('bet-odds').value,
+                payout: payout,
+                profit: profit,
+                result: document.getElementById('bet-result').value,
+                bonusBet: document.getElementById('bet-bonus').checked,
+                profitBoost: document.getElementById('bet-boost').checked,
+                notes: document.getElementById('bet-notes').value
+            };
+            
+            try {
+                const timestamp = Date.now();
+                await storage.set(`bet:${timestamp}`, JSON.stringify(bet));
+                
+                alert('Bet added successfully!');
+                document.getElementById('bet-form').reset();
+                document.getElementById('bet-date').valueAsDate = new Date();
+                
+                // Reset parlay legs to single default leg
+                const parlayLegsDiv = document.getElementById('parlay-legs');
+                parlayLegsDiv.innerHTML = '<div class="parlay-leg mb-2"><input type="text" class="form-control parlay-leg-input" placeholder="Sport/Event (e.g., NBA: Lakers ML)"></div>';
+                document.getElementById('remove-parlay-leg').style.display = 'none';
+                
+                loadDashboard();
+            } catch (error) {
+                console.error('Error saving bet:', error);
+                alert('Error saving bet: ' + error.message);
+            }
+        });
+        
+        // Resolve pending bet
+        async function resolveBet(betId, result) {
+            try {
+                const betResult = await storage.get(betId);
+                if (!betResult || !betResult.value) {
+                    alert('Bet not found');
+                    return;
+                }
+                
+                const bet = JSON.parse(betResult.value);
+                bet.result = result;
+                
+                // Update profit based on result
+                if (result === 'Lost') {
+                    bet.payout = 0;
+                    bet.profit = -bet.wager;
+                } else if (result === 'Push') {
+                    bet.payout = bet.wager;
+                    bet.profit = 0;
+                }
+                // For 'Won', keep the original payout and profit
+                
+                await storage.set(betId, JSON.stringify(bet));
+                
+                alert(`Bet marked as ${result}!`);
+                loadDashboard();
+            } catch (error) {
+                console.error('Error resolving bet:', error);
+                alert('Error resolving bet');
+            }
+        }
+        
+        // Delete bet
+        async function deleteBet(betId) {
+            if (!confirm('Are you sure you want to delete this bet?')) return;
+            
+            try {
+                await storage.delete(betId);
+                alert('Bet deleted successfully!');
+                loadDashboard();
+            } catch (error) {
+                console.error('Error deleting bet:', error);
+                alert('Error deleting bet');
+            }
+        }
+        
+        // Load dashboard on page load
+        // Add event listeners to highlight filled inputs with green border
+        document.querySelectorAll('.form-control').forEach(input => {
+            input.addEventListener('input', function() {
+                if (this.value.trim() !== '') {
+                    this.style.borderColor = '#55c278';
+                } else {
+                    this.style.borderColor = '#ced4da';
+                }
+            });
+        });
+        
+        // Handle bet type change to show/hide parlay legs
+        document.getElementById('bet-type').addEventListener('change', function() {
+            const singleContainer = document.getElementById('single-sport-container');
+            const parlayContainer = document.getElementById('parlay-legs-container');
+            
+            if (this.value === 'Parlay') {
+                singleContainer.style.display = 'none';
+                parlayContainer.style.display = 'block';
+                document.getElementById('bet-sport').removeAttribute('required');
+            } else {
+                singleContainer.style.display = 'block';
+                parlayContainer.style.display = 'none';
+                document.getElementById('bet-sport').setAttribute('required', 'required');
+            }
+        });
+        
+        // Add parlay leg
+        document.getElementById('add-parlay-leg').addEventListener('click', function() {
+            const parlayLegsDiv = document.getElementById('parlay-legs');
+            const newLeg = document.createElement('div');
+            newLeg.className = 'parlay-leg mb-2';
+            newLeg.innerHTML = '<input type="text" class="form-control parlay-leg-input" placeholder="Sport/Event (e.g., NBA: Lakers ML)">';
+            parlayLegsDiv.appendChild(newLeg);
+            
+            // Show remove button if more than 1 leg
+            const legCount = parlayLegsDiv.querySelectorAll('.parlay-leg').length;
+            if (legCount > 1) {
+                document.getElementById('remove-parlay-leg').style.display = 'inline-block';
+            }
+        });
+        
+        // Remove parlay leg
+        document.getElementById('remove-parlay-leg').addEventListener('click', function() {
+            const parlayLegsDiv = document.getElementById('parlay-legs');
+            const legs = parlayLegsDiv.querySelectorAll('.parlay-leg');
+            
+            if (legs.length > 1) {
+                legs[legs.length - 1].remove();
+            }
+            
+            // Hide remove button if only 1 leg remains
+            if (legs.length <= 2) {
+                this.style.display = 'none';
+            }
+        });
+        
+        // Load dashboard on page load
+        loadDashboard();
+    </script>
+</body>
+</html>
