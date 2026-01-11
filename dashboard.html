@@ -2068,22 +2068,7 @@
                     }
                 });
                 
-                // Add pending bet wagers to balance (money still at sportsbook)
-                allBets.forEach(bet => {
-                    if (bet.result === 'Pending' && !bet.bonusBet) {
-                        if (!sportsbookData[bet.sportsbook]) {
-                            sportsbookData[bet.sportsbook] = {
-                                totalDeposited: 0,
-                                totalWithdrawn: 0,
-                                balance: 0
-                            };
-                        }
-                        // Pending bets are still at the sportsbook, so add them to balance
-                        sportsbookData[bet.sportsbook].balance += bet.wager;
-                    }
-                });
-                
-                // Add completed bet payouts to balance (winnings still at sportsbook)
+                // Add winning bet payouts to balance (winnings still at sportsbook)
                 allBets.forEach(bet => {
                     if (bet.result === 'Won') {
                         if (!sportsbookData[bet.sportsbook]) {
