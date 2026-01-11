@@ -1134,12 +1134,15 @@
             // Avg profit uses totalEarnings which already accounts for bonus bets
             const avgProfit = totalBets > 0 ? (totalEarnings / totalBets) : 0;
             
-            document.getElementById('total-earnings').textContent = '$' + totalEarnings.toFixed(2);
+            // Format currency with proper negative sign placement
+            const formatCurrency = (amount) => amount >= 0 ? '$' + amount.toFixed(2) : '-$' + Math.abs(amount).toFixed(2);
+            
+            document.getElementById('total-earnings').textContent = formatCurrency(totalEarnings);
             document.getElementById('total-bets').textContent = totalBets;
             document.getElementById('win-rate').textContent = winRate + '%';
-            document.getElementById('avg-wager').textContent = '$' + avgWager.toFixed(2);
-            document.getElementById('avg-payout').textContent = '$' + avgPayout.toFixed(2);
-            document.getElementById('avg-profit').textContent = '$' + avgProfit.toFixed(2);
+            document.getElementById('avg-wager').textContent = formatCurrency(avgWager);
+            document.getElementById('avg-payout').textContent = formatCurrency(avgPayout);
+            document.getElementById('avg-profit').textContent = formatCurrency(avgProfit);
         }
         
         function updatePendingTable(bets) {
@@ -2092,13 +2095,15 @@
                 } else {
                     balTbody.innerHTML = sportsbookEntries.map(([sportsbook, data]) => {
                         const profit = sportsbookProfits[sportsbook] || 0;
+                        // Format currency with proper negative sign
+                        const formatCurrency = (amount) => amount >= 0 ? '$' + amount.toFixed(2) : '-$' + Math.abs(amount).toFixed(2);
                         return `
                             <tr>
                                 <td>${sportsbook}</td>
-                                <td>$${data.totalDeposited.toFixed(2)}</td>
-                                <td>$${data.totalWithdrawn.toFixed(2)}</td>
-                                <td class="${data.balance >= 0 ? 'text-success' : 'text-danger'}">$${data.balance.toFixed(2)}</td>
-                                <td class="${profit >= 0 ? 'text-success' : 'text-danger'}">$${profit.toFixed(2)}</td>
+                                <td>${formatCurrency(data.totalDeposited)}</td>
+                                <td>${formatCurrency(data.totalWithdrawn)}</td>
+                                <td class="${data.balance >= 0 ? 'text-success' : 'text-danger'}">${formatCurrency(data.balance)}</td>
+                                <td class="${profit >= 0 ? 'text-success' : 'text-danger'}">${formatCurrency(profit)}</td>
                             </tr>
                         `;
                     }).join('');
