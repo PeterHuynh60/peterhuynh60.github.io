@@ -2032,7 +2032,7 @@
                     const last10Transactions = transactions.slice(0, 10);
                     txTbody.innerHTML = last10Transactions.map(tx => {
                         // Handle both new date field and old timestamp-only format
-                        const displayDate = tx.date ? formatDateForDisplay(tx.date) : new Date(tx.timestamp).toLocaleDateString('en-US');
+                        const displayDate = tx.date ? formatDateForDisplay(tx.date) : new Date(tx.timestamp).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
                         return `
                         <tr>
                             <td>${displayDate}</td>
