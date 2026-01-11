@@ -1658,7 +1658,7 @@
                 
                 alert('Transaction updated successfully!');
                 closeEditTransactionModal();
-                loadBankroll();
+                loadDashboard(); // Refresh entire dashboard
             } catch (error) {
                 console.error('Error updating transaction:', error);
                 alert('Error updating transaction: ' + error.message);
@@ -1675,7 +1675,7 @@
             try {
                 await db.collection('bankroll').doc(txId).delete();
                 alert('Transaction deleted successfully!');
-                loadBankroll();
+                loadDashboard(); // Refresh entire dashboard
             } catch (error) {
                 console.error('Error deleting transaction:', error);
                 alert('Error deleting transaction');
@@ -2137,7 +2137,7 @@
                 alert('Transaction added successfully!');
                 document.getElementById('bankroll-form').reset();
                 document.getElementById('bankroll-date').value = getLocalDateString();
-                loadBankroll();
+                loadDashboard(); // Refresh entire dashboard to update all tables
                 
             } catch (error) {
                 console.error('Error adding transaction:', error);
@@ -2157,7 +2157,7 @@
             try {
                 await db.collection('bankroll').doc(txId).delete();
                 alert('Transaction deleted successfully!');
-                loadBankroll();
+                loadDashboard(); // Refresh entire dashboard
             } catch (error) {
                 console.error('Error deleting transaction:', error);
                 alert('Error deleting transaction');
