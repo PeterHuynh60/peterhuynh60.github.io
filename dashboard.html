@@ -17,13 +17,14 @@
     <style>
         body {
             padding-top: 56px;
+            margin: 0;
             font-family: "Muli", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
             color: #212529;
             background-color: #77CE93;
         }
         
         .container-fluid {
-            padding: 2rem 1.5rem;
+            padding: 2rem;
             max-width: 1800px;
             margin: 0 auto;
         }
@@ -232,38 +233,62 @@
             top: 10px;
             right: 10px;
             z-index: 1000;
-            background-color: white;
-            border: 2px solid #55c278;
-            font-family: "Muli", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            padding: 0.5rem 1rem;
-            border-radius: 4px;
             display: none;
-            align-items: center;
-            gap: 1rem;
         }
         
         .user-info img {
-            width: 30px;
-            height: 30px;
+            width: 45px;
+            height: 45px;
             border-radius: 50%;
+            border: 3px solid #55c278;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
         }
         
-        .user-info span {
+        .user-info img:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 10px rgba(85, 194, 120, 0.5);
+        }
+        
+        .user-dropdown {
+            position: absolute;
+            top: 55px;
+            right: 0;
+            background-color: white;
+            border: 2px solid #55c278;
+            border-radius: 4px;
+            padding: 0.5rem;
+            display: none;
+            min-width: 150px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .user-dropdown.show {
+            display: block;
+        }
+        
+        .user-dropdown-name {
+            padding: 0.5rem;
             font-size: 0.9rem;
             color: #212529;
+            border-bottom: 1px solid #e0e0e0;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
         }
         
-        .user-info button {
+        .user-dropdown button {
+            width: 100%;
             background-color: #dc3545;
             border: none;
             color: white;
-            padding: 0.25rem 0.75rem;
+            padding: 0.5rem;
             border-radius: 4px;
             cursor: pointer;
-            font-size: 0.85rem;
+            font-size: 0.9rem;
+            transition: background-color 0.2s;
         }
         
-        .user-info button:hover {
+        .user-dropdown button:hover {
             background-color: #c82333;
         }
         
@@ -386,9 +411,11 @@
     <!-- Authentication UI -->
     <button id="sign-in-btn" class="auth-button">Sign In</button>
     <div id="user-info" class="user-info">
-        <img id="user-photo" src="" alt="User">
-        <span id="user-name"></span>
-        <button id="sign-out-btn">Sign Out</button>
+        <img id="user-photo" src="" alt="User" onclick="toggleUserDropdown()">
+        <div id="user-dropdown" class="user-dropdown">
+            <div class="user-dropdown-name" id="user-name"></div>
+            <button id="sign-out-btn">Sign Out</button>
+        </div>
     </div>
     
     <div class="container-fluid">
@@ -931,6 +958,24 @@
             });
         });
         
+        // Toggle user dropdown menu
+        function toggleUserDropdown() {
+            const dropdown = document.getElementById('user-dropdown');
+            dropdown.classList.toggle('show');
+        }
+        
+        // Close dropdown when clicking outside
+        document.addEventListener('click', (event) => {
+            const userInfo = document.getElementById('user-info');
+            const dropdown = document.getElementById('user-dropdown');
+            const userPhoto = document.getElementById('user-photo');
+            
+            // If click is outside user-info area and dropdown is open
+            if (!userInfo.contains(event.target) && dropdown.classList.contains('show')) {
+                dropdown.classList.remove('show');
+            }
+        });
+        
         // ============================================
         // STORAGE WRAPPER (Firebase Firestore)
         // ============================================
@@ -1235,7 +1280,7 @@
                     maintainAspectRatio: true,
                     plugins: {
                         legend: {
-                            position: 'bottom'
+                            display: false
                         }
                     }
                 }
@@ -1284,24 +1329,7 @@
                     maintainAspectRatio: true,
                     plugins: {
                         legend: {
-                            position: 'right',
-                            labels: {
-                                generateLabels: function(chart) {
-                                    const data = chart.data;
-                                    if (data.labels.length && data.datasets.length) {
-                                        return data.labels.map((label, i) => {
-                                            const value = data.datasets[0].data[i];
-                                            return {
-                                                text: `${label}: $${value.toFixed(0)}`,
-                                                fillStyle: data.datasets[0].backgroundColor[i],
-                                                hidden: false,
-                                                index: i
-                                            };
-                                        });
-                                    }
-                                    return [];
-                                }
-                            }
+                            display: false
                         },
                         tooltip: {
                             callbacks: {
@@ -1865,8 +1893,8 @@
         // ============================================
         async function loadBankroll() {
             try {
-                // Fetch all transactions
-                const snapshot = await db.collection('bankroll').orderBy('date', 'desc').get();
+                // Fetch all transactions (ordered by timestamp for compatibility with old data)
+                const snapshot = await db.collection('bankroll').orderBy('timestamp', 'desc').get();
                 
                 const transactions = [];
                 snapshot.forEach(doc => {
@@ -1916,9 +1944,12 @@
                     txTbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">No transactions yet</td></tr>';
                 } else {
                     const last10Transactions = transactions.slice(0, 10);
-                    txTbody.innerHTML = last10Transactions.map(tx => `
+                    txTbody.innerHTML = last10Transactions.map(tx => {
+                        // Handle both new date field and old timestamp-only format
+                        const displayDate = tx.date ? formatDateForDisplay(tx.date) : new Date(tx.timestamp).toLocaleDateString('en-US');
+                        return `
                         <tr>
-                            <td>${formatDateForDisplay(tx.date)}</td>
+                            <td>${displayDate}</td>
                             <td>${tx.sportsbook}</td>
                             <td><span class="badge badge-${tx.type === 'Deposit' ? 'success' : 'warning'}">${tx.type}</span></td>
                             <td>$${tx.amount.toFixed(2)}</td>
@@ -1926,7 +1957,8 @@
                                 <button class="btn btn-sm btn-danger" onclick="deleteBankrollTransaction('${tx.id}')">Delete</button>
                             </td>
                         </tr>
-                    `).join('');
+                        `;
+                    }).join('');
                 }
                 
                 // Update balances table with full breakdown
