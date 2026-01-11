@@ -1161,8 +1161,17 @@
             }, 0);
             
             const totalBets = completedBets.length;
-            const winningBets = completedBets.filter(bet => bet.result === 'Won').length;
-            const winRate = totalBets > 0 ? ((winningBets / totalBets) * 100).toFixed(1) : 0;
+            
+            // Calculate win rate (exclude non-parlay promotion harvesting losses)
+            const betsForWinRate = completedBets.filter(bet => {
+                // Exclude if: non-parlay AND promotion harvesting AND lost
+                const isNonParlayPromoLoss = bet.betType === 'Promotion Harvesting' 
+                    && bet.betType !== 'Parlay' 
+                    && bet.result === 'Lost';
+                return !isNonParlayPromoLoss;
+            });
+            const winningBets = betsForWinRate.filter(bet => bet.result === 'Won').length;
+            const winRate = betsForWinRate.length > 0 ? ((winningBets / betsForWinRate.length) * 100).toFixed(1) : 0;
             
             // Calculate averages
             // Exclude bonus bet wagers from avg wager calculation
@@ -1680,6 +1689,7 @@
         // Save edited transaction
         document.getElementById('edit-transaction-form').addEventListener('submit', async (e) => {
             e.preventDefault();
+            console.log('Edit transaction form submitted');
             
             if (!isAdmin) {
                 alert('You must be signed in as admin to edit transactions');
@@ -1687,6 +1697,7 @@
             }
             
             const txId = document.getElementById('edit-tx-id').value;
+            console.log('Editing transaction ID:', txId);
             
             try {
                 const updatedTx = {
@@ -1697,11 +1708,13 @@
                     timestamp: Date.now() // Update timestamp
                 };
                 
+                console.log('Updating transaction with:', updatedTx);
                 await db.collection('bankroll').doc(txId).update(updatedTx);
+                console.log('Transaction updated successfully');
                 
                 alert('Transaction updated successfully!');
                 closeEditTransactionModal();
-                loadDashboard(); // Refresh entire dashboard
+                await loadDashboard(); // Refresh entire dashboard
             } catch (error) {
                 console.error('Error updating transaction:', error);
                 alert('Error updating transaction: ' + error.message);
@@ -2160,6 +2173,7 @@
         // Add bankroll transaction
         document.getElementById('bankroll-form').addEventListener('submit', async (e) => {
             e.preventDefault();
+            console.log('Bankroll form submitted');
             
             if (!isAdmin) {
                 alert('You must be signed in as admin to add transactions');
@@ -2175,14 +2189,23 @@
                     timestamp: Date.now()  // Keep for sorting
                 };
                 
-                await db.collection('bankroll').add(transaction);
+                console.log('Adding transaction:', transaction);
+                const docRef = await db.collection('bankroll').add(transaction);
+                console.log('Transaction added with ID:', docRef.id);
                 
                 alert('Transaction added successfully!');
                 document.getElementById('bankroll-form').reset();
                 document.getElementById('bankroll-date').value = getLocalDateString();
-                loadDashboard(); // Refresh entire dashboard to update all tables
+                
+                console.log('Reloading dashboard...');
+                await loadDashboard(); // Refresh entire dashboard to update all tables
+                console.log('Dashboard reloaded');
                 
             } catch (error) {
+                console.error('Error adding transaction:', error);
+                alert('Error adding transaction: ' + error.message);
+            }
+        });
                 console.error('Error adding transaction:', error);
                 alert('Error adding transaction: ' + error.message);
             }
