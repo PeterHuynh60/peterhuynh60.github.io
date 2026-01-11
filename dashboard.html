@@ -1381,7 +1381,7 @@
                     <td>${bet.odds}</td>
                     <td>$${displayedPayout.toFixed(2)}</td>
                     <td class="${displayedProfit >= 0 ? 'profit-positive' : 'profit-negative'}">
-                        ${displayedProfit >= 0 ? '+' : ''}$${displayedProfit.toFixed(2)}
+                        ${displayedProfit >= 0 ? '+$' + displayedProfit.toFixed(2) : '-$' + Math.abs(displayedProfit).toFixed(2)}
                     </td>
                     <td><span class="badge badge-${bet.result.toLowerCase()}">${bet.result}</span></td>
                     <td>
@@ -1990,7 +1990,7 @@
                     });
                 });
                 
-                // Calculate balances and totals per sportsbook
+                // Calculate balances and totals per sportsbook (including all transactions)
                 const sportsbookData = {};
                 transactions.forEach(tx => {
                     if (!sportsbookData[tx.sportsbook]) {
@@ -2009,13 +2009,48 @@
                     }
                 });
                 
-                // Calculate profit from bets per sportsbook
+                // Add pending bet wagers to balance (money still at sportsbook)
+                allBets.forEach(bet => {
+                    if (bet.result === 'Pending' && !bet.bonusBet) {
+                        if (!sportsbookData[bet.sportsbook]) {
+                            sportsbookData[bet.sportsbook] = {
+                                totalDeposited: 0,
+                                totalWithdrawn: 0,
+                                balance: 0
+                            };
+                        }
+                        // Pending bets are still at the sportsbook, so add them to balance
+                        sportsbookData[bet.sportsbook].balance += bet.wager;
+                    }
+                });
+                
+                // Add completed bet payouts to balance (winnings still at sportsbook)
+                allBets.forEach(bet => {
+                    if (bet.result === 'Won') {
+                        if (!sportsbookData[bet.sportsbook]) {
+                            sportsbookData[bet.sportsbook] = {
+                                totalDeposited: 0,
+                                totalWithdrawn: 0,
+                                balance: 0
+                            };
+                        }
+                        // Add winnings to balance
+                        sportsbookData[bet.sportsbook].balance += bet.payout;
+                    }
+                });
+                
+                // Calculate profit from bets per sportsbook (completed AND pending)
                 const sportsbookProfits = {};
                 allBets.forEach(bet => {
-                    if (bet.result !== 'Pending') {
-                        if (!sportsbookProfits[bet.sportsbook]) {
-                            sportsbookProfits[bet.sportsbook] = 0;
-                        }
+                    if (!sportsbookProfits[bet.sportsbook]) {
+                        sportsbookProfits[bet.sportsbook] = 0;
+                    }
+                    
+                    if (bet.result === 'Pending' && !bet.bonusBet) {
+                        // Subtract pending wagers from profit (money at risk)
+                        sportsbookProfits[bet.sportsbook] -= bet.wager;
+                    } else if (bet.result !== 'Pending') {
+                        // Add completed bet profit
                         if (bet.bonusBet) {
                             sportsbookProfits[bet.sportsbook] += bet.payout;
                         } else {
@@ -2024,12 +2059,14 @@
                     }
                 });
                 
-                // Update transactions table
+                // Update transactions table (filter out "Bet placed" transactions)
                 const txTbody = document.getElementById('bankroll-transactions');
-                if (transactions.length === 0) {
+                const manualTransactions = transactions.filter(tx => !tx.note || tx.note !== 'Bet placed');
+                
+                if (manualTransactions.length === 0) {
                     txTbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">No transactions yet</td></tr>';
                 } else {
-                    const last10Transactions = transactions.slice(0, 10);
+                    const last10Transactions = manualTransactions.slice(0, 10);
                     txTbody.innerHTML = last10Transactions.map(tx => {
                         // Handle both new date field and old timestamp-only format
                         const displayDate = tx.date ? formatDateForDisplay(tx.date) : new Date(tx.timestamp).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
