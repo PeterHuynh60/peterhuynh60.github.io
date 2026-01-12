@@ -1289,7 +1289,7 @@
                     maintainAspectRatio: true,
                     plugins: {
                         legend: {
-                            position: 'bottom'
+                            display: false
                         }
                     }
                 }
@@ -1925,26 +1925,48 @@
                     }
                     if (tx.type === 'Deposit') {
                         sportsbookData[tx.sportsbook].totalDeposited += tx.amount;
-                        sportsbookData[tx.sportsbook].balance += tx.amount;
                     } else {
                         sportsbookData[tx.sportsbook].totalWithdrawn += tx.amount;
-                        sportsbookData[tx.sportsbook].balance -= tx.amount;
                     }
                 });
                 
-                // Calculate profit from bets per sportsbook
-                const sportsbookProfits = {};
+                // Calculate Current Balance and Total Profit per sportsbook
                 allBets.forEach(bet => {
-                    if (bet.result !== 'Pending') {
-                        if (!sportsbookProfits[bet.sportsbook]) {
-                            sportsbookProfits[bet.sportsbook] = 0;
-                        }
-                        if (bet.bonusBet) {
-                            sportsbookProfits[bet.sportsbook] += bet.payout;
-                        } else {
-                            sportsbookProfits[bet.sportsbook] += bet.profit;
-                        }
+                    if (!sportsbookData[bet.sportsbook]) {
+                        sportsbookData[bet.sportsbook] = {
+                            totalDeposited: 0,
+                            totalWithdrawn: 0,
+                            balance: 0
+                        };
                     }
+                    
+                    // For Current Balance calculation:
+                    // Current Balance = Total Deposited - Total Withdrawn - Wager in Pending - Wager in History + Payout in History
+                    
+                    if (bet.result === 'Pending' && !bet.bonusBet) {
+                        // Subtract pending bet wagers
+                        sportsbookData[bet.sportsbook].balance -= bet.wager;
+                    } else if (bet.result !== 'Pending') {
+                        // For completed bets: subtract wager, add payout
+                        if (!bet.bonusBet) {
+                            sportsbookData[bet.sportsbook].balance -= bet.wager;
+                        }
+                        sportsbookData[bet.sportsbook].balance += bet.payout;
+                    }
+                });
+                
+                // Now calculate the actual balance for each sportsbook
+                Object.keys(sportsbookData).forEach(sportsbook => {
+                    const data = sportsbookData[sportsbook];
+                    // Current Balance = Total Deposited - Total Withdrawn + (bet adjustments already applied above)
+                    data.balance = data.totalDeposited - data.totalWithdrawn + data.balance;
+                });
+                
+                // Calculate Total Profit per sportsbook
+                // Total Profit = Total Withdrawn - Total Deposited + Current Balance
+                const sportsbookProfits = {};
+                Object.entries(sportsbookData).forEach(([sportsbook, data]) => {
+                    sportsbookProfits[sportsbook] = data.totalWithdrawn - data.totalDeposited + data.balance;
                 });
                 
                 // Update transactions table
@@ -1974,13 +1996,15 @@
                 } else {
                     balTbody.innerHTML = sportsbookEntries.map(([sportsbook, data]) => {
                         const profit = sportsbookProfits[sportsbook] || 0;
+                        // Format currency with proper negative sign
+                        const formatCurrency = (amount) => amount >= 0 ? '$' + amount.toFixed(2) : '-$' + Math.abs(amount).toFixed(2);
                         return `
                             <tr>
                                 <td>${sportsbook}</td>
-                                <td>$${data.totalDeposited.toFixed(2)}</td>
-                                <td>$${data.totalWithdrawn.toFixed(2)}</td>
-                                <td class="${data.balance >= 0 ? 'text-success' : 'text-danger'}">$${data.balance.toFixed(2)}</td>
-                                <td class="${profit >= 0 ? 'text-success' : 'text-danger'}">$${profit.toFixed(2)}</td>
+                                <td>${formatCurrency(data.totalDeposited)}</td>
+                                <td>${formatCurrency(data.totalWithdrawn)}</td>
+                                <td class="${data.balance >= 0 ? 'text-success' : 'text-danger'}">${formatCurrency(data.balance)}</td>
+                                <td class="${profit >= 0 ? 'text-success' : 'text-danger'}">${formatCurrency(profit)}</td>
                             </tr>
                         `;
                     }).join('');
