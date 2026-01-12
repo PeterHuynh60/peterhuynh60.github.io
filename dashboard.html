@@ -512,7 +512,7 @@
                                 <button type="button" class="btn btn-outline-secondary" data-timeframe="3m" onclick="filterProfitChart('3m')" style="font-size: 0.7rem; padding: 0.2rem 0.4rem;">3M</button>
                             </div>
                         </div>
-                        <canvas id="profit-chart" style="height: 350px;"></canvas>
+                        <canvas id="profit-chart" style="height: 280px;"></canvas>
                     </div>
                 </div>
             </div>
@@ -524,7 +524,7 @@
                 <div class="card border-0">
                     <div class="card-body">
                         <h5 class="card-title mb-3">Profit by Strategy</h5>
-                        <canvas id="strategy-chart" style="height: 250px;"></canvas>
+                        <canvas id="strategy-chart" style="height: 180px;"></canvas>
                     </div>
                 </div>
             </div>
@@ -533,7 +533,7 @@
                 <div class="card border-0">
                     <div class="card-body">
                         <h5 class="card-title mb-3">Profit by Sportsbook</h5>
-                        <canvas id="sportsbook-profit-chart" style="height: 250px;"></canvas>
+                        <canvas id="sportsbook-profit-chart" style="height: 180px;"></canvas>
                     </div>
                 </div>
             </div>
@@ -632,7 +632,9 @@
                     
                     <div class="col-md-6 mb-3">
                         <label for="bet-sportsbook">Sportsbook</label>
-                        <input type="text" class="form-control" id="bet-sportsbook" placeholder="e.g., DraftKings" required>
+                        <select class="form-control" id="bet-sportsbook" required>
+                            <option value="">Select sportsbook...</option>
+                        </select>
                     </div>
                     
                     <div class="col-md-6 mb-3" id="single-sport-container">
@@ -2088,15 +2090,23 @@
             // Sort alphabetically
             const sportsbooks = Array.from(sportsbookSet).sort();
             
-            // Update dropdown
-            const dropdown = document.getElementById('bankroll-sportsbook');
-            dropdown.innerHTML = '<option value="">Select sportsbook...</option>';
+            // Update bankroll transaction dropdown (with "Other" option)
+            const bankrollDropdown = document.getElementById('bankroll-sportsbook');
+            bankrollDropdown.innerHTML = '<option value="">Select sportsbook...</option>';
             
             sportsbooks.forEach(sportsbook => {
-                dropdown.innerHTML += `<option value="${sportsbook}">${sportsbook}</option>`;
+                bankrollDropdown.innerHTML += `<option value="${sportsbook}">${sportsbook}</option>`;
             });
             
-            dropdown.innerHTML += '<option value="Other">Other (add new)</option>';
+            bankrollDropdown.innerHTML += '<option value="Other">Other (add new)</option>';
+            
+            // Update bet form dropdown (no "Other" option)
+            const betDropdown = document.getElementById('bet-sportsbook');
+            betDropdown.innerHTML = '<option value="">Select sportsbook...</option>';
+            
+            sportsbooks.forEach(sportsbook => {
+                betDropdown.innerHTML += `<option value="${sportsbook}">${sportsbook}</option>`;
+            });
         }
         
         // Handle sportsbook dropdown change
