@@ -1298,7 +1298,7 @@
                 options: {
                     indexAxis: 'y', // This makes it horizontal
                     responsive: true,
-                    maintainAspectRatio: false,
+                    maintainAspectRatio: true,
                     plugins: {
                         legend: {
                             display: false
@@ -1324,6 +1324,12 @@
                                     size: 11
                                 }
                             }
+                        }
+                    },
+                    datasets: {
+                        bar: {
+                            barThickness: 20,
+                            maxBarThickness: 25
                         }
                     }
                 }
@@ -1370,7 +1376,7 @@
                 options: {
                     indexAxis: 'y', // This makes it horizontal
                     responsive: true,
-                    maintainAspectRatio: false,
+                    maintainAspectRatio: true,
                     plugins: {
                         legend: {
                             display: false
@@ -1396,6 +1402,12 @@
                                     size: 11
                                 }
                             }
+                        }
+                    },
+                    datasets: {
+                        bar: {
+                            barThickness: 20,
+                            maxBarThickness: 25
                         }
                     }
                 }
@@ -1954,8 +1966,8 @@
             
             if (balanceCard && profitCanvas) {
                 const balanceHeight = balanceCard.offsetHeight;
-                // Subtract some pixels for the card header and padding
-                const chartHeight = balanceHeight - 80; // Adjust for title and padding
+                // Subtract some pixels for the card header and padding (reduced to give more height)
+                const chartHeight = balanceHeight - 60; // Adjust for title and padding
                 profitCanvas.style.height = chartHeight + 'px';
                 
                 // Trigger chart redraw if it exists
@@ -2073,10 +2085,24 @@
                 if (sportsbookEntries.length === 0) {
                     balTbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">No balances yet</td></tr>';
                 } else {
+                    // Calculate totals
+                    let totalDeposited = 0;
+                    let totalWithdrawn = 0;
+                    let totalBalance = 0;
+                    let totalProfit = 0;
+                    
+                    sportsbookEntries.forEach(([sportsbook, data]) => {
+                        totalDeposited += data.totalDeposited;
+                        totalWithdrawn += data.totalWithdrawn;
+                        totalBalance += data.balance;
+                        totalProfit += (sportsbookProfits[sportsbook] || 0);
+                    });
+                    
+                    // Format currency with proper negative sign
+                    const formatCurrency = (amount) => amount >= 0 ? '$' + amount.toFixed(2) : '-$' + Math.abs(amount).toFixed(2);
+                    
                     balTbody.innerHTML = sportsbookEntries.map(([sportsbook, data]) => {
                         const profit = sportsbookProfits[sportsbook] || 0;
-                        // Format currency with proper negative sign
-                        const formatCurrency = (amount) => amount >= 0 ? '$' + amount.toFixed(2) : '-$' + Math.abs(amount).toFixed(2);
                         return `
                             <tr>
                                 <td>${sportsbook}</td>
@@ -2086,7 +2112,15 @@
                                 <td class="${profit >= 0 ? 'text-success' : 'text-danger'}">${formatCurrency(profit)}</td>
                             </tr>
                         `;
-                    }).join('');
+                    }).join('') + `
+                        <tr style="font-weight: bold; border-top: 2px solid #dee2e6;">
+                            <td>TOTAL</td>
+                            <td>${formatCurrency(totalDeposited)}</td>
+                            <td>${formatCurrency(totalWithdrawn)}</td>
+                            <td class="${totalBalance >= 0 ? 'text-success' : 'text-danger'}">${formatCurrency(totalBalance)}</td>
+                            <td class="${totalProfit >= 0 ? 'text-success' : 'text-danger'}">${formatCurrency(totalProfit)}</td>
+                        </tr>
+                    `;
                 }
                 
                 // Update sportsbook dropdown options
