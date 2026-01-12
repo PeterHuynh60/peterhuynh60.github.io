@@ -474,7 +474,7 @@
         <!-- Current Balances and Small Profit Chart -->
         <div class="row mb-4">
             <div class="col-lg-8 mb-4">
-                <div class="card border-0">
+                <div class="card border-0" id="balance-card">
                     <div class="card-body">
                         <h5 class="card-title mb-3">Current Balances by Sportsbook</h5>
                         <div class="table-responsive">
@@ -512,7 +512,7 @@
                                 <button type="button" class="btn btn-outline-secondary" data-timeframe="3m" onclick="filterProfitChart('3m')" style="font-size: 0.7rem; padding: 0.2rem 0.4rem;">3M</button>
                             </div>
                         </div>
-                        <canvas id="profit-chart" style="height: 280px;"></canvas>
+                        <canvas id="profit-chart"></canvas>
                     </div>
                 </div>
             </div>
@@ -1100,6 +1100,9 @@
                 updatePendingTable(bets);
                 updateTable(bets);
                 loadBankroll();
+                
+                // Match profit chart height to balance table (with slight delay for rendering)
+                setTimeout(matchProfitChartHeight, 100);
                 
             } catch (error) {
                 console.error('Error loading dashboard:', error);
@@ -1944,6 +1947,24 @@
             });
         }
         
+        // Match profit chart height to balance table
+        function matchProfitChartHeight() {
+            const balanceCard = document.getElementById('balance-card');
+            const profitCanvas = document.getElementById('profit-chart');
+            
+            if (balanceCard && profitCanvas) {
+                const balanceHeight = balanceCard.offsetHeight;
+                // Subtract some pixels for the card header and padding
+                const chartHeight = balanceHeight - 80; // Adjust for title and padding
+                profitCanvas.style.height = chartHeight + 'px';
+                
+                // Trigger chart redraw if it exists
+                if (profitChart) {
+                    profitChart.resize();
+                }
+            }
+        }
+        
         // ============================================
         // BANKROLL MANAGEMENT
         // ============================================
@@ -2034,7 +2055,7 @@
                             <td><span class="badge badge-${tx.type === 'Deposit' ? 'success' : 'warning'}">${tx.type}</span></td>
                             <td>$${tx.amount.toFixed(2)}</td>
                             <td class="admin-only">
-                                <button class="btn btn-sm btn-danger" onclick="deleteBankrollTransaction('${tx.id}')">Delete</button>
+                                <button class="btn btn-sm btn-primary" onclick="openEditTransactionModal('${tx.id}')">Edit</button>
                             </td>
                         </tr>
                     `).join('');
@@ -2166,6 +2187,90 @@
             }
         });
         
+        // ============================================
+        // EDIT TRANSACTION MODAL
+        // ============================================
+        
+        // Open edit transaction modal
+        async function openEditTransactionModal(txId) {
+            try {
+                const doc = await db.collection('bankroll').doc(txId).get();
+                if (!doc.exists) {
+                    alert('Transaction not found');
+                    return;
+                }
+                
+                const tx = doc.data();
+                
+                // Populate form
+                document.getElementById('edit-tx-id').value = txId;
+                document.getElementById('edit-tx-date').value = tx.date || new Date(tx.timestamp).toISOString().split('T')[0];
+                document.getElementById('edit-tx-sportsbook').value = tx.sportsbook;
+                document.getElementById('edit-tx-type').value = tx.type;
+                document.getElementById('edit-tx-amount').value = tx.amount;
+                
+                // Show modal
+                document.getElementById('edit-transaction-modal').style.display = 'block';
+            } catch (error) {
+                console.error('Error loading transaction:', error);
+                alert('Error loading transaction');
+            }
+        }
+        
+        // Close edit transaction modal
+        function closeEditTransactionModal() {
+            document.getElementById('edit-transaction-modal').style.display = 'none';
+            document.getElementById('edit-transaction-form').reset();
+        }
+        
+        // Save edited transaction
+        document.getElementById('edit-transaction-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            if (!isAdmin) {
+                alert('You must be signed in as admin to edit transactions');
+                return;
+            }
+            
+            const txId = document.getElementById('edit-tx-id').value;
+            
+            try {
+                const updatedTx = {
+                    date: document.getElementById('edit-tx-date').value,
+                    sportsbook: document.getElementById('edit-tx-sportsbook').value,
+                    type: document.getElementById('edit-tx-type').value,
+                    amount: parseFloat(document.getElementById('edit-tx-amount').value),
+                    timestamp: Date.now() // Update timestamp
+                };
+                
+                await db.collection('bankroll').doc(txId).update(updatedTx);
+                
+                alert('Transaction updated successfully!');
+                closeEditTransactionModal();
+                loadBankroll();
+            } catch (error) {
+                console.error('Error updating transaction:', error);
+                alert('Error updating transaction: ' + error.message);
+            }
+        });
+        
+        // Delete transaction from edit modal
+        async function deleteTransactionFromEdit() {
+            if (!confirm('Are you sure you want to delete this transaction?')) return;
+            
+            const txId = document.getElementById('edit-tx-id').value;
+            closeEditTransactionModal();
+            
+            try {
+                await db.collection('bankroll').doc(txId).delete();
+                alert('Transaction deleted successfully!');
+                loadBankroll();
+            } catch (error) {
+                console.error('Error deleting transaction:', error);
+                alert('Error deleting transaction');
+            }
+        }
+        
         // Delete bankroll transaction
         async function deleteBankrollTransaction(txId) {
             if (!isAdmin) {
@@ -2188,5 +2293,49 @@
         // Load dashboard on page load
         loadDashboard();
     </script>
+    
+    <!-- Edit Transaction Modal -->
+    <div id="edit-transaction-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 2000; overflow-y: auto;">
+        <div style="background: white; max-width: 600px; margin: 50px auto; padding: 2rem; border-radius: 8px; position: relative;">
+            <button onclick="closeEditTransactionModal()" style="position: absolute; top: 10px; right: 10px; background: none; border: none; font-size: 24px; cursor: pointer; color: #6c757d;">&times;</button>
+            
+            <h4 style="font-family: 'Saira Extra Condensed', sans-serif; font-weight: 700; text-transform: uppercase; color: #55c278; margin-bottom: 1.5rem; text-align: center;">Edit Transaction</h4>
+            
+            <form id="edit-transaction-form">
+                <input type="hidden" id="edit-tx-id">
+                
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="edit-tx-date">Date</label>
+                        <input type="date" class="form-control" id="edit-tx-date" required>
+                    </div>
+                    
+                    <div class="col-md-6 mb-3">
+                        <label for="edit-tx-sportsbook">Sportsbook</label>
+                        <input type="text" class="form-control" id="edit-tx-sportsbook" required>
+                    </div>
+                    
+                    <div class="col-md-6 mb-3">
+                        <label for="edit-tx-type">Transaction Type</label>
+                        <select class="form-control" id="edit-tx-type" required>
+                            <option value="Deposit">Deposit</option>
+                            <option value="Withdraw">Withdraw</option>
+                        </select>
+                    </div>
+                    
+                    <div class="col-md-6 mb-3">
+                        <label for="edit-tx-amount">Amount ($)</label>
+                        <input type="number" step="0.01" class="form-control" id="edit-tx-amount" required>
+                    </div>
+                </div>
+                
+                <div style="display: flex; gap: 1rem; justify-content: center; margin-top: 1.5rem;">
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                    <button type="button" class="btn btn-danger" onclick="deleteTransactionFromEdit()">Delete Transaction</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeEditTransactionModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
 </body>
 </html>
