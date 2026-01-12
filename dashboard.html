@@ -524,7 +524,7 @@
                 <div class="card border-0">
                     <div class="card-body">
                         <h5 class="card-title mb-3">Profit by Strategy</h5>
-                        <canvas id="strategy-chart" style="height: 180px;"></canvas>
+                        <canvas id="strategy-chart" style="height: 45px;"></canvas>
                     </div>
                 </div>
             </div>
@@ -533,7 +533,7 @@
                 <div class="card border-0">
                     <div class="card-body">
                         <h5 class="card-title mb-3">Profit by Sportsbook</h5>
-                        <canvas id="sportsbook-profit-chart" style="height: 180px;"></canvas>
+                        <canvas id="sportsbook-profit-chart" style="height: 45px;"></canvas>
                     </div>
                 </div>
             </div>
@@ -593,6 +593,9 @@
                     </tbody>
                 </table>
             </div>
+            <div id="bet-history-see-more" class="text-center mt-3" style="display: none;">
+                <button class="btn btn-sm btn-outline-secondary" onclick="toggleBetHistory()">See more</button>
+            </div>
         </div>
         
         <!-- Transaction History Table (Last 10) -->
@@ -615,6 +618,9 @@
                         </tr>
                     </tbody>
                 </table>
+            </div>
+            <div id="transaction-history-see-more" class="text-center mt-3" style="display: none;">
+                <button class="btn btn-sm btn-outline-secondary" onclick="toggleTransactionHistory()">See more</button>
             </div>
         </div>
         
@@ -1041,6 +1047,8 @@
         // ============================================
         let profitChart, strategyChart, sportsbookProfitChart;
         let allBets = []; // Store all bets globally for filtering
+        let showAllBetHistory = false; // Track if showing all bet history
+        let showAllTransactions = false; // Track if showing all transactions
         let currentTimeframe = 'all'; // Current time filter
         
         // Helper function to get local date string in YYYY-MM-DD format
@@ -1191,12 +1199,11 @@
                         ${bet.bonusBet ? '<span class="badge badge-bonus">Bonus</span> ' : ''}
                         ${bet.profitBoost ? '<span class="badge badge-boost">Boost</span>' : ''}
                     </td>
-                    <td class="admin-only">
-                        <button class="btn btn-sm btn-success" onclick="resolveBet('${bet.id}', 'Won')">Won</button>
-                        <button class="btn btn-sm btn-danger" onclick="resolveBet('${bet.id}', 'Lost')">Lost</button>
-                        <button class="btn btn-sm btn-secondary" onclick="resolveBet('${bet.id}', 'Push')">Push</button>
-                        <br>
-                        <button class="btn btn-sm btn-primary mt-2" onclick="openEditModal('${bet.id}')">Edit</button>
+                    <td class="admin-only" style="white-space: nowrap;">
+                        <button class="btn btn-sm btn-success" onclick="resolveBet('${bet.id}', 'Won')" style="padding: 0.15rem 0.4rem; font-size: 0.75rem;">Won</button>
+                        <button class="btn btn-sm btn-danger" onclick="resolveBet('${bet.id}', 'Lost')" style="padding: 0.15rem 0.4rem; font-size: 0.75rem;">Lost</button>
+                        <button class="btn btn-sm btn-secondary" onclick="resolveBet('${bet.id}', 'Push')" style="padding: 0.15rem 0.4rem; font-size: 0.75rem;">Push</button>
+                        <button class="btn btn-sm btn-primary" onclick="openEditModal('${bet.id}')" style="padding: 0.15rem 0.4rem; font-size: 0.75rem;">Edit</button>
                     </td>
                 </tr>
             `;
@@ -1422,18 +1429,42 @@
             });
         }
         
+        // Toggle bet history between 10 and all
+        function toggleBetHistory() {
+            showAllBetHistory = !showAllBetHistory;
+            updateTable(allBets);
+        }
+        
+        // Toggle transaction history between 10 and all
+        function toggleTransactionHistory() {
+            showAllTransactions = !showAllTransactions;
+            loadBankroll();
+        }
+        
         function updateTable(bets) {
-            // Only show completed bets (last 10)
+            // Only show completed bets
             const completedBets = bets.filter(bet => bet.result !== 'Pending');
-            const last10Bets = completedBets.slice(0, 10); // Show only last 10
             const tbody = document.getElementById('bet-history');
+            const seeMoreButton = document.getElementById('bet-history-see-more');
             
-            if (last10Bets.length === 0) {
+            if (completedBets.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="11" class="text-center text-muted">No completed bets yet.</td></tr>';
+                seeMoreButton.style.display = 'none';
                 return;
             }
             
-            tbody.innerHTML = completedBets.map(bet => {
+            // Show 10 or all based on state
+            const betsToShow = showAllBetHistory ? completedBets : completedBets.slice(0, 10);
+            
+            // Show/hide see more button
+            if (completedBets.length > 10) {
+                seeMoreButton.style.display = 'block';
+                seeMoreButton.querySelector('button').textContent = showAllBetHistory ? 'See less' : 'See more';
+            } else {
+                seeMoreButton.style.display = 'none';
+            }
+            
+            tbody.innerHTML = betsToShow.map(bet => {
                 // Format sport/event - handle both string and array (parlay)
                 let sportDisplay;
                 if (Array.isArray(bet.sport)) {
@@ -1521,22 +1552,8 @@
                 const timestamp = Date.now();
                 await storage.set(`bet:${timestamp}`, JSON.stringify(bet));
                 
-                // Deduct wager from bankroll (add withdrawal transaction) - only if not a bonus bet
-                if (!bet.bonusBet) {
-                    try {
-                        await db.collection('bankroll').add({
-                            date: bet.date,
-                            sportsbook: bet.sportsbook,
-                            type: 'Withdraw',
-                            amount: bet.wager,
-                            timestamp: timestamp,
-                            note: 'Bet placed'
-                        });
-                    } catch (bankrollError) {
-                        console.error('Error updating bankroll:', bankrollError);
-                        // Don't fail the bet if bankroll update fails
-                    }
-                }
+                // Note: No longer auto-creating withdrawal transactions for bets
+                // Users manage their bankroll separately via Add Transaction
                 
                 alert('Bet added successfully!');
                 document.getElementById('bet-form').reset();
@@ -1974,8 +1991,8 @@
             
             if (balanceCard && profitCanvas) {
                 const balanceHeight = balanceCard.offsetHeight;
-                // Subtract card body padding but keep chart tall to match table with totals row
-                const chartHeight = balanceHeight - 50; // Less subtraction for better match
+                // Match table height more precisely - less subtraction for better match
+                const chartHeight = balanceHeight - 35; // Fine-tuned for exact visual match
                 profitCanvas.style.height = chartHeight + 'px';
                 
                 // Trigger chart redraw if it exists
@@ -2074,11 +2091,24 @@
                 
                 // Update transactions table
                 const txTbody = document.getElementById('bankroll-transactions');
+                const txSeeMoreButton = document.getElementById('transaction-history-see-more');
+                
                 if (transactions.length === 0) {
                     txTbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">No transactions yet</td></tr>';
+                    txSeeMoreButton.style.display = 'none';
                 } else {
-                    const last10Transactions = transactions.slice(0, 10);
-                    txTbody.innerHTML = last10Transactions.map(tx => `
+                    // Show 10 or all based on state
+                    const transactionsToShow = showAllTransactions ? transactions : transactions.slice(0, 10);
+                    
+                    // Show/hide see more button
+                    if (transactions.length > 10) {
+                        txSeeMoreButton.style.display = 'block';
+                        txSeeMoreButton.querySelector('button').textContent = showAllTransactions ? 'See less' : 'See more';
+                    } else {
+                        txSeeMoreButton.style.display = 'none';
+                    }
+                    
+                    txTbody.innerHTML = transactionsToShow.map(tx => `
                         <tr>
                             <td>${formatDateForDisplay(tx.date)}</td>
                             <td>${tx.sportsbook}</td>
