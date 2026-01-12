@@ -24,7 +24,7 @@
         
         .container-fluid {
             padding: 2rem 1.5rem;
-            max-width: 1800px;
+            max-width: 2000px;
             margin: 0 auto;
         }
         
@@ -227,43 +227,67 @@
             background-color: #48a869;
         }
         
-        .user-info {
+                .user-info {
             position: fixed;
             top: 10px;
             right: 10px;
             z-index: 1000;
-            background-color: white;
-            border: 2px solid #55c278;
-            font-family: "Muli", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            padding: 0.5rem 1rem;
-            border-radius: 4px;
             display: none;
-            align-items: center;
-            gap: 1rem;
         }
         
         .user-info img {
-            width: 30px;
-            height: 30px;
+            width: 45px;
+            height: 45px;
             border-radius: 50%;
+            border: 3px solid #55c278;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
         }
         
-        .user-info span {
+        .user-info img:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 10px rgba(85, 194, 120, 0.5);
+        }
+        
+        .user-dropdown {
+            position: absolute;
+            top: 55px;
+            right: 0;
+            background-color: white;
+            border: 2px solid #55c278;
+            border-radius: 4px;
+            padding: 0.5rem;
+            display: none;
+            min-width: 150px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .user-dropdown.show {
+            display: block;
+        }
+        
+        .user-dropdown-name {
+            padding: 0.5rem;
             font-size: 0.9rem;
             color: #212529;
+            border-bottom: 1px solid #e0e0e0;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
         }
         
-        .user-info button {
+        .user-dropdown button {
+            width: 100%;
             background-color: #dc3545;
             border: none;
             color: white;
-            padding: 0.25rem 0.75rem;
+            padding: 0.5rem;
             border-radius: 4px;
             cursor: pointer;
-            font-size: 0.85rem;
+            font-size: 0.9rem;
+            transition: background-color 0.2s;
         }
         
-        .user-info button:hover {
+        .user-dropdown button:hover {
             background-color: #c82333;
         }
         
@@ -386,9 +410,11 @@
     <!-- Authentication UI -->
     <button id="sign-in-btn" class="auth-button">Sign In</button>
     <div id="user-info" class="user-info">
-        <img id="user-photo" src="" alt="User">
-        <span id="user-name"></span>
-        <button id="sign-out-btn">Sign Out</button>
+        <img id="user-photo" src="" alt="User" onclick="toggleUserDropdown()">
+        <div id="user-dropdown" class="user-dropdown">
+            <div class="user-dropdown-name" id="user-name"></div>
+            <button id="sign-out-btn">Sign Out</button>
+        </div>
     </div>
     
     <div class="container-fluid">
@@ -931,6 +957,23 @@
             });
         });
         
+        // Toggle user dropdown menu
+        function toggleUserDropdown() {
+            const dropdown = document.getElementById('user-dropdown');
+            dropdown.classList.toggle('show');
+        }
+        
+        // Close dropdown when clicking outside
+        document.addEventListener('click', (event) => {
+            const userInfo = document.getElementById('user-info');
+            const dropdown = document.getElementById('user-dropdown');
+            
+            // If click is outside user-info area and dropdown is open
+            if (!userInfo.contains(event.target) && dropdown.classList.contains('show')) {
+                dropdown.classList.remove('show');
+            }
+        });
+        
         // ============================================
         // STORAGE WRAPPER (Firebase Firestore)
         // ============================================
@@ -1071,8 +1114,16 @@
             }, 0);
             
             const totalBets = completedBets.length;
-            const winningBets = completedBets.filter(bet => bet.result === 'Won').length;
-            const winRate = totalBets > 0 ? ((winningBets / totalBets) * 100).toFixed(1) : 0;
+            // Calculate win rate (exclude non-parlay promotion harvesting losses)
+            const betsForWinRate = completedBets.filter(bet => {
+                // Exclude if: non-parlay AND promotion harvesting AND lost
+                const isNonParlayPromoLoss = bet.betType === 'Promotion Harvesting' 
+                    && bet.betType !== 'Parlay' 
+                    && bet.result === 'Lost';
+                return !isNonParlayPromoLoss;
+            });
+            const winningBets = betsForWinRate.filter(bet => bet.result === 'Won').length;
+            const winRate = betsForWinRate.length > 0 ? ((winningBets / betsForWinRate.length) * 100).toFixed(1) : 0;
             
             // Calculate averages
             // Exclude bonus bet wagers from avg wager calculation
@@ -1087,12 +1138,15 @@
             // Avg profit uses totalEarnings which already accounts for bonus bets
             const avgProfit = totalBets > 0 ? (totalEarnings / totalBets) : 0;
             
-            document.getElementById('total-earnings').textContent = '$' + totalEarnings.toFixed(2);
+            // Format currency with proper negative sign placement
+            const formatCurrency = (amount) => amount >= 0 ? '$' + amount.toFixed(2) : '-$' + Math.abs(amount).toFixed(2);
+            
+            document.getElementById('total-earnings').textContent = formatCurrency(totalEarnings);
             document.getElementById('total-bets').textContent = totalBets;
             document.getElementById('win-rate').textContent = winRate + '%';
-            document.getElementById('avg-wager').textContent = '$' + avgWager.toFixed(2);
-            document.getElementById('avg-payout').textContent = '$' + avgPayout.toFixed(2);
-            document.getElementById('avg-profit').textContent = '$' + avgProfit.toFixed(2);
+            document.getElementById('avg-wager').textContent = formatCurrency(avgWager);
+            document.getElementById('avg-payout').textContent = formatCurrency(avgPayout);
+            document.getElementById('avg-profit').textContent = formatCurrency(avgProfit);
         }
         
         function updatePendingTable(bets) {
@@ -1284,24 +1338,7 @@
                     maintainAspectRatio: true,
                     plugins: {
                         legend: {
-                            position: 'right',
-                            labels: {
-                                generateLabels: function(chart) {
-                                    const data = chart.data;
-                                    if (data.labels.length && data.datasets.length) {
-                                        return data.labels.map((label, i) => {
-                                            const value = data.datasets[0].data[i];
-                                            return {
-                                                text: `${label}: $${value.toFixed(0)}`,
-                                                fillStyle: data.datasets[0].backgroundColor[i],
-                                                hidden: false,
-                                                index: i
-                                            };
-                                        });
-                                    }
-                                    return [];
-                                }
-                            }
+                            display: false
                         },
                         tooltip: {
                             callbacks: {
@@ -1351,7 +1388,7 @@
                     <td>${bet.odds}</td>
                     <td>$${displayedPayout.toFixed(2)}</td>
                     <td class="${displayedProfit >= 0 ? 'profit-positive' : 'profit-negative'}">
-                        ${displayedProfit >= 0 ? '+' : ''}$${displayedProfit.toFixed(2)}
+                        ${displayedProfit >= 0 ? '+$' + displayedProfit.toFixed(2) : '-$' + Math.abs(displayedProfit).toFixed(2)}
                     </td>
                     <td><span class="badge badge-${bet.result.toLowerCase()}">${bet.result}</span></td>
                     <td>
