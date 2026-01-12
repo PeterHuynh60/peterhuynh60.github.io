@@ -512,7 +512,7 @@
                                 <button type="button" class="btn btn-outline-secondary" data-timeframe="3m" onclick="filterProfitChart('3m')" style="font-size: 0.7rem; padding: 0.2rem 0.4rem;">3M</button>
                             </div>
                         </div>
-                        <canvas id="profit-chart" style="max-height: 200px;"></canvas>
+                        <canvas id="profit-chart" style="height: 350px;"></canvas>
                     </div>
                 </div>
             </div>
@@ -524,7 +524,7 @@
                 <div class="card border-0">
                     <div class="card-body">
                         <h5 class="card-title mb-3">Profit by Strategy</h5>
-                        <canvas id="strategy-chart" style="max-height: 300px;"></canvas>
+                        <canvas id="strategy-chart" style="height: 250px;"></canvas>
                     </div>
                 </div>
             </div>
@@ -533,7 +533,7 @@
                 <div class="card border-0">
                     <div class="card-body">
                         <h5 class="card-title mb-3">Profit by Sportsbook</h5>
-                        <canvas id="sportsbook-profit-chart" style="max-height: 300px;"></canvas>
+                        <canvas id="sportsbook-profit-chart" style="height: 250px;"></canvas>
                     </div>
                 </div>
             </div>
@@ -617,7 +617,6 @@
                 </table>
             </div>
         </div>
-    </div>
         
         <!-- Add New Bet Form -->
         <div class="form-section mb-5" id="add-bet-section" style="display: none;">
@@ -731,7 +730,14 @@
                     
                     <div class="col-md-3 mb-3">
                         <label for="bankroll-sportsbook">Sportsbook</label>
-                        <input type="text" class="form-control" id="bankroll-sportsbook" placeholder="e.g., DraftKings" required>
+                        <select class="form-control" id="bankroll-sportsbook" required onchange="handleSportsbookChange(this)">
+                            <option value="">Select sportsbook...</option>
+                        </select>
+                    </div>
+                    
+                    <div class="col-md-3 mb-3" id="custom-sportsbook-container" style="display: none;">
+                        <label for="custom-sportsbook">New Sportsbook Name</label>
+                        <input type="text" class="form-control" id="custom-sportsbook" placeholder="e.g., DraftKings">
                     </div>
                     
                     <div class="col-md-3 mb-3">
@@ -754,6 +760,7 @@
                 </div>
             </form>
         </div>
+    </div>
     </div>
     
     <!-- Edit Bet Modal -->
@@ -1269,7 +1276,7 @@
             if (strategyChart) strategyChart.destroy();
             
             strategyChart = new Chart(strategyCtx, {
-                type: 'doughnut',
+                type: 'bar',
                 data: {
                     labels: Object.keys(strategyTotals),
                     datasets: [{
@@ -1284,11 +1291,34 @@
                     }]
                 },
                 options: {
+                    indexAxis: 'y', // This makes it horizontal
                     responsive: true,
-                    maintainAspectRatio: true,
+                    maintainAspectRatio: false,
                     plugins: {
                         legend: {
                             display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.label + ': $' + context.parsed.x.toFixed(2);
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: value => '$' + value.toFixed(0)
+                            }
+                        },
+                        y: {
+                            ticks: {
+                                font: {
+                                    size: 11
+                                }
+                            }
                         }
                     }
                 }
@@ -1313,7 +1343,7 @@
             if (sportsbookProfitChart) sportsbookProfitChart.destroy();
             
             sportsbookProfitChart = new Chart(sportsbookProfitCtx, {
-                type: 'pie',
+                type: 'bar',
                 data: {
                     labels: Object.keys(sportsbookTotals),
                     datasets: [{
@@ -1333,8 +1363,9 @@
                     }]
                 },
                 options: {
+                    indexAxis: 'y', // This makes it horizontal
                     responsive: true,
-                    maintainAspectRatio: true,
+                    maintainAspectRatio: false,
                     plugins: {
                         legend: {
                             display: false
@@ -1342,7 +1373,22 @@
                         tooltip: {
                             callbacks: {
                                 label: function(context) {
-                                    return `${context.label}: $${context.parsed.toFixed(2)}`;
+                                    return `${context.label}: $${context.parsed.x.toFixed(2)}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: value => '$' + value.toFixed(0)
+                            }
+                        },
+                        y: {
+                            ticks: {
+                                font: {
+                                    size: 11
                                 }
                             }
                         }
@@ -2020,8 +2066,51 @@
                     }).join('');
                 }
                 
+                // Update sportsbook dropdown options
+                updateSportsbookDropdown();
+                
             } catch (error) {
                 console.error('Error loading bankroll:', error);
+            }
+        }
+        
+        // Update sportsbook dropdown with all unique sportsbooks
+        function updateSportsbookDropdown() {
+            const sportsbookSet = new Set();
+            
+            // Get sportsbooks from bets
+            allBets.forEach(bet => {
+                if (bet.sportsbook) {
+                    sportsbookSet.add(bet.sportsbook.trim());
+                }
+            });
+            
+            // Sort alphabetically
+            const sportsbooks = Array.from(sportsbookSet).sort();
+            
+            // Update dropdown
+            const dropdown = document.getElementById('bankroll-sportsbook');
+            dropdown.innerHTML = '<option value="">Select sportsbook...</option>';
+            
+            sportsbooks.forEach(sportsbook => {
+                dropdown.innerHTML += `<option value="${sportsbook}">${sportsbook}</option>`;
+            });
+            
+            dropdown.innerHTML += '<option value="Other">Other (add new)</option>';
+        }
+        
+        // Handle sportsbook dropdown change
+        function handleSportsbookChange(select) {
+            const customContainer = document.getElementById('custom-sportsbook-container');
+            const customInput = document.getElementById('custom-sportsbook');
+            
+            if (select.value === 'Other') {
+                customContainer.style.display = 'block';
+                customInput.required = true;
+            } else {
+                customContainer.style.display = 'none';
+                customInput.required = false;
+                customInput.value = '';
             }
         }
         
@@ -2035,9 +2124,19 @@
             }
             
             try {
+                // Get sportsbook value - use custom input if "Other" is selected
+                let sportsbookValue = document.getElementById('bankroll-sportsbook').value;
+                if (sportsbookValue === 'Other') {
+                    sportsbookValue = document.getElementById('custom-sportsbook').value.trim();
+                    if (!sportsbookValue) {
+                        alert('Please enter a sportsbook name');
+                        return;
+                    }
+                }
+                
                 const transaction = {
                     date: document.getElementById('bankroll-date').value,
-                    sportsbook: document.getElementById('bankroll-sportsbook').value,
+                    sportsbook: sportsbookValue,
                     type: document.getElementById('bankroll-type').value,
                     amount: parseFloat(document.getElementById('bankroll-amount').value),
                     timestamp: Date.now()  // Keep for sorting
@@ -2048,6 +2147,7 @@
                 alert('Transaction added successfully!');
                 document.getElementById('bankroll-form').reset();
                 document.getElementById('bankroll-date').value = getLocalDateString();
+                document.getElementById('custom-sportsbook-container').style.display = 'none';
                 loadBankroll();
                 
             } catch (error) {
