@@ -1913,26 +1913,31 @@
                 });
                 
                 // Calculate balances and totals per sportsbook
+                // Normalize sportsbook names to prevent duplicates from spacing/case differences
+                const normalizeSportsbook = (name) => name.trim();
+                
                 const sportsbookData = {};
                 transactions.forEach(tx => {
-                    if (!sportsbookData[tx.sportsbook]) {
-                        sportsbookData[tx.sportsbook] = {
+                    const sportsbook = normalizeSportsbook(tx.sportsbook);
+                    if (!sportsbookData[sportsbook]) {
+                        sportsbookData[sportsbook] = {
                             totalDeposited: 0,
                             totalWithdrawn: 0,
                             balance: 0
                         };
                     }
                     if (tx.type === 'Deposit') {
-                        sportsbookData[tx.sportsbook].totalDeposited += tx.amount;
+                        sportsbookData[sportsbook].totalDeposited += tx.amount;
                     } else {
-                        sportsbookData[tx.sportsbook].totalWithdrawn += tx.amount;
+                        sportsbookData[sportsbook].totalWithdrawn += tx.amount;
                     }
                 });
                 
                 // Calculate Current Balance and Total Profit per sportsbook
                 allBets.forEach(bet => {
-                    if (!sportsbookData[bet.sportsbook]) {
-                        sportsbookData[bet.sportsbook] = {
+                    const sportsbook = normalizeSportsbook(bet.sportsbook);
+                    if (!sportsbookData[sportsbook]) {
+                        sportsbookData[sportsbook] = {
                             totalDeposited: 0,
                             totalWithdrawn: 0,
                             balance: 0
@@ -1944,13 +1949,13 @@
                     
                     if (bet.result === 'Pending' && !bet.bonusBet) {
                         // Subtract pending bet wagers
-                        sportsbookData[bet.sportsbook].balance -= bet.wager;
+                        sportsbookData[sportsbook].balance -= bet.wager;
                     } else if (bet.result !== 'Pending') {
                         // For completed bets: subtract wager, add payout
                         if (!bet.bonusBet) {
-                            sportsbookData[bet.sportsbook].balance -= bet.wager;
+                            sportsbookData[sportsbook].balance -= bet.wager;
                         }
-                        sportsbookData[bet.sportsbook].balance += bet.payout;
+                        sportsbookData[sportsbook].balance += bet.payout;
                     }
                 });
                 
@@ -1989,7 +1994,13 @@
                 
                 // Update balances table with full breakdown
                 const balTbody = document.getElementById('bankroll-balances');
-                const sportsbookEntries = Object.entries(sportsbookData);
+                
+                // Sort sportsbooks alphabetically
+                const sportsbookEntries = Object.entries(sportsbookData).sort((a, b) => a[0].localeCompare(b[0]));
+                
+                // Debug: log sportsbook names to check for duplicates
+                console.log('Sportsbooks in balance table:', sportsbookEntries.map(([name]) => name));
+                
                 if (sportsbookEntries.length === 0) {
                     balTbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">No balances yet</td></tr>';
                 } else {
