@@ -8,6 +8,15 @@
     <meta http-equiv="Expires" content="0" />
     <title>Betting Dashboard - Peter Huynh</title>
     <link rel="icon" type="image/x-icon" href="assets/img/favicon.ico" />
+    
+    <!-- PWA Meta Tags -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Betting Dashboard">
+    <meta name="theme-color" content="#55c278">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    <link rel="apple-touch-icon" sizes="512x512" href="icon-512.png">
     <link href="https://fonts.googleapis.com/css?family=Saira+Extra+Condensed:500,700" rel="stylesheet" type="text/css" />
     <link href="https://fonts.googleapis.com/css?family=Muli:400,400i,800,800i" rel="stylesheet" type="text/css" />
     <link href="css/styles.css" rel="stylesheet" />
@@ -542,7 +551,7 @@
                 <div class="card border-0">
                     <div class="card-body">
                         <h5 class="card-title mb-3">Profit by Strategy</h5>
-                        <canvas id="strategy-chart" style="height: 45px;"></canvas>
+                        <canvas id="strategy-chart" style="height: 150px;"></canvas>
                     </div>
                 </div>
             </div>
@@ -551,7 +560,7 @@
                 <div class="card border-0">
                     <div class="card-body">
                         <h5 class="card-title mb-3">Profit by Sportsbook</h5>
-                        <canvas id="sportsbook-profit-chart" style="height: 45px;"></canvas>
+                        <canvas id="sportsbook-profit-chart" style="height: 150px;"></canvas>
                     </div>
                 </div>
             </div>
@@ -1340,7 +1349,7 @@
                 options: {
                     indexAxis: 'y', // This makes it horizontal
                     responsive: true,
-                    maintainAspectRatio: true,
+                    maintainAspectRatio: false,
                     plugins: {
                         legend: {
                             display: false
@@ -1418,7 +1427,7 @@
                 options: {
                     indexAxis: 'y', // This makes it horizontal
                     responsive: true,
-                    maintainAspectRatio: true,
+                    maintainAspectRatio: false,
                     plugins: {
                         legend: {
                             display: false
@@ -2452,5 +2461,16 @@
             </form>
         </div>
     </div>
+    
+    <!-- PWA Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                    .then(registration => console.log('ServiceWorker registered'))
+                    .catch(err => console.log('ServiceWorker registration failed:', err));
+            });
+        }
+    </script>
 </body>
 </html>
