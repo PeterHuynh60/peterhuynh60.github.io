@@ -339,6 +339,60 @@
                 </div>
             </div>
         </section>
+
+        <hr class="m-0" />
+
+        <section class="resume-section">
+            <div class="resume-section-content">
+                <h2 class="mb-5">Home Search HQ</h2>
+                
+                <div class="row mb-4">
+                    <div class="col-lg-3 col-md-6 mb-4">
+                        <div class="card border-success">
+                            <div class="card-body text-center">
+                                <h5 class="card-title text-muted mb-2">Properties</h5>
+                                <h2 class="text-success mb-0" id="hshq-total">Loading...</h2>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-3 col-md-6 mb-4">
+                        <div class="card border-primary">
+                            <div class="card-body text-center">
+                                <h5 class="card-title text-muted mb-2">Active</h5>
+                                <h2 class="text-primary mb-0" id="hshq-active">Loading...</h2>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-3 col-md-6 mb-4">
+                        <div class="card border-info">
+                            <div class="card-body text-center">
+                                <h5 class="card-title text-muted mb-2">Avg Price</h5>
+                                <h2 class="text-info mb-0" id="hshq-avg">Loading...</h2>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-3 col-md-6 mb-4">
+                        <div class="card border-warning">
+                            <div class="card-body text-center">
+                                <h5 class="card-title text-muted mb-2">Top Rated</h5>
+                                <h2 class="text-warning mb-0" id="hshq-top">Loading...</h2>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Mini Property Preview Cards -->
+                <div class="row mb-4" id="hshq-preview-row">
+                </div>
+                
+                <div class="text-center">
+                    <a href="https://home.huynh.place" target="_blank" class="btn btn-success btn-lg">View Full Dashboard</a>
+                </div>
+            </div>
+        </section>
         <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
         // Firebase Configuration
         const firebaseConfig = {
@@ -690,5 +744,73 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-easing/1.4.1/jquery.easing.min.js"></script>
     <script src="js/scripts.js"></script>
+
+    <!-- Home Search HQ Dashboard Data -->
+    <script>
+    (function() {
+        var hshqConfig = {
+            apiKey: "AIzaSyAIItpT-SoHxB2Y6jhGtUmy2o6s2z_HiAM",
+            authDomain: "home-search-hq.firebaseapp.com",
+            projectId: "home-search-hq",
+            storageBucket: "home-search-hq.firebasestorage.app",
+            messagingSenderId: "631504248905",
+            appId: "1:631504248905:web:d4fbdc6f73580904445f98"
+        };
+        var hshqApp = firebase.initializeApp(hshqConfig, "hshq");
+        var hshqDb = hshqApp.firestore();
+
+        hshqDb.collection("homes").get().then(function(snap) {
+            var homes = [];
+            snap.forEach(function(doc) { homes.push(Object.assign({ id: doc.id }, doc.data())); });
+
+            var total = homes.length;
+            var active = homes.filter(function(h) { return !h.sold && !h.pending && !h.tooExpensive; }).length;
+            var prices = homes.map(function(h) { return h.price; }).filter(function(p) { return p > 0; });
+            var avgPrice = prices.length ? Math.round(prices.reduce(function(a, b) { return a + b; }, 0) / prices.length / 1000) : 0;
+
+            var rated = homes.filter(function(h) { return h.michelleRating != null && h.peterRating != null; });
+            rated.sort(function(a, b) { return (b.michelleRating + b.peterRating) - (a.michelleRating + a.peterRating); });
+            var topScore = rated.length ? (rated[0].michelleRating + rated[0].peterRating) + "/20" : "—";
+
+            document.getElementById("hshq-total").textContent = total;
+            document.getElementById("hshq-active").textContent = active;
+            document.getElementById("hshq-avg").textContent = "$" + avgPrice + "k";
+            document.getElementById("hshq-top").textContent = topScore;
+
+            // Mini preview cards - top 3 rated active homes with photos
+            var topHomes = homes
+                .filter(function(h) { return !h.sold && !h.pending && !h.tooExpensive && h.photoUrl; })
+                .sort(function(a, b) {
+                    return ((b.michelleRating || 0) + (b.peterRating || 0)) - ((a.michelleRating || 0) + (a.peterRating || 0));
+                })
+                .slice(0, 3);
+
+            var previewRow = document.getElementById("hshq-preview-row");
+            topHomes.forEach(function(h) {
+                var rating = (h.michelleRating || 0) + (h.peterRating || 0);
+                var status = rating >= 14 ? "Excellent" : rating >= 12 ? "Good" : rating >= 10 ? "Hmm..." : "Waiting";
+                var colors = { Excellent: "#0d6efd", Good: "#28a745", "Hmm...": "#ffc107", Waiting: "#17a2b8" };
+                var sc = colors[status] || "#17a2b8";
+
+                var col = document.createElement("div");
+                col.className = "col-lg-4 col-md-4 mb-4";
+                col.innerHTML = '<div class="card" style="overflow:hidden">' +
+                    '<div style="height:3px;background:' + sc + '"></div>' +
+                    '<div style="height:120px;overflow:hidden;background:#f0f4f1"><img src="' + h.photoUrl + '" style="width:100%;height:100%;object-fit:cover" onerror="this.parentElement.style.display=\'none\'"></div>' +
+                    '<div class="card-body" style="padding:12px">' +
+                        '<h6 class="card-title mb-1" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + h.address + '</h6>' +
+                        '<p class="text-muted mb-1" style="font-size:12px">' + h.city + (h.neighborhood ? ' &middot; ' + h.neighborhood : '') + '</p>' +
+                        '<div class="d-flex justify-content-between align-items-center">' +
+                            '<span class="text-success" style="font-size:18px;font-weight:800">$' + h.price.toLocaleString() + '</span>' +
+                            '<span style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:4px;background:' + sc + '22;color:' + sc + '">' + status + '</span>' +
+                        '</div>' +
+                    '</div></div>';
+                previewRow.appendChild(col);
+            });
+        }).catch(function(e) {
+            console.error("HSHQ data fetch error:", e);
+        });
+    })();
+    </script>
 </body>
 </html>
