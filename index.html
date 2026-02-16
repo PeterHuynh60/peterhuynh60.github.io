@@ -517,6 +517,119 @@
             }
         })();
         </script>
+
+                <!-- ═══ Home Search HQ Dashboard Card ═══ -->
+        <!-- Paste this into your Dashboards section in index.html, after the B.E.T. section -->
+        
+        <h2 class="mb-5">Home Search HQ</h2>
+        
+        <div id="hshq-card" style="max-width:720px;margin:0 auto 2rem;">
+          
+          <!-- Live Stats Row -->
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;">
+            <div style="background:linear-gradient(135deg,#55c278,#3da85e);border-radius:12px;padding:16px;text-align:center;color:#fff;box-shadow:0 4px 15px rgba(85,194,120,0.3);">
+              <div style="font-size:11px;opacity:0.8;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px;font-weight:600;">Properties</div>
+              <div id="hshq-total" style="font-size:28px;font-weight:800;line-height:1;">—</div>
+            </div>
+            <div style="background:linear-gradient(135deg,#55c278,#3da85e);border-radius:12px;padding:16px;text-align:center;color:#fff;box-shadow:0 4px 15px rgba(85,194,120,0.3);">
+              <div style="font-size:11px;opacity:0.8;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px;font-weight:600;">Active</div>
+              <div id="hshq-active" style="font-size:28px;font-weight:800;line-height:1;">—</div>
+            </div>
+            <div style="background:linear-gradient(135deg,#55c278,#3da85e);border-radius:12px;padding:16px;text-align:center;color:#fff;box-shadow:0 4px 15px rgba(85,194,120,0.3);">
+              <div style="font-size:11px;opacity:0.8;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px;font-weight:600;">Avg Price</div>
+              <div id="hshq-avg" style="font-size:28px;font-weight:800;line-height:1;">—</div>
+            </div>
+            <div style="background:linear-gradient(135deg,#55c278,#3da85e);border-radius:12px;padding:16px;text-align:center;color:#fff;box-shadow:0 4px 15px rgba(85,194,120,0.3);">
+              <div style="font-size:11px;opacity:0.8;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px;font-weight:600;">Top Rated</div>
+              <div id="hshq-top" style="font-size:28px;font-weight:800;line-height:1;">—</div>
+            </div>
+          </div>
+        
+          <!-- Mini Property Cards Preview -->
+          <div id="hshq-preview" style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px;">
+            <!-- Populated by JS -->
+          </div>
+        
+          <!-- CTA Button -->
+          <div style="text-align:center;">
+            <a href="https://home.huynh.place" target="_blank" style="display:inline-block;background:#55c278;color:#fff;padding:12px 32px;border-radius:10px;text-decoration:none;font-weight:700;font-size:15px;box-shadow:0 4px 15px rgba(85,194,120,0.35);transition:all 0.2s ease;" 
+               onmouseover="this.style.background='#3da85e';this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 20px rgba(85,194,120,0.45)'" 
+               onmouseout="this.style.background='#55c278';this.style.transform='translateY(0)';this.style.boxShadow='0 4px 15px rgba(85,194,120,0.35)'">
+              View Full Dashboard
+            </a>
+          </div>
+        </div>
+        
+        <!-- ═══ Firebase Script for Live Data ═══ -->
+        <!-- Add these scripts to your <head> or before this section if not already present -->
+        <script type="module">
+          import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+          import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        
+          const app = initializeApp({
+            apiKey: "AIzaSyAIItpT-SoHxB2Y6jhGtUmy2o6s2z_HiAM",
+            authDomain: "home-search-hq.firebaseapp.com",
+            projectId: "home-search-hq",
+            storageBucket: "home-search-hq.firebasestorage.app",
+            messagingSenderId: "631504248905",
+            appId: "1:631504248905:web:d4fbdc6f73580904445f98"
+          }, "hshq");
+        
+          const db = getFirestore(app);
+        
+          try {
+            const snap = await getDocs(collection(db, "homes"));
+            const homes = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+            
+            // Stats
+            const total = homes.length;
+            const active = homes.filter(h => !h.sold && !h.pending && !h.tooExpensive).length;
+            const prices = homes.map(h => h.price).filter(p => p > 0);
+            const avgPrice = prices.length ? Math.round(prices.reduce((a, b) => a + b, 0) / prices.length / 1000) : 0;
+            
+            // Top rated
+            const rated = homes.filter(h => h.michelleRating != null && h.peterRating != null);
+            const topRated = rated.sort((a, b) => (b.michelleRating + b.peterRating) - (a.michelleRating + a.peterRating))[0];
+        
+            document.getElementById("hshq-total").textContent = total;
+            document.getElementById("hshq-active").textContent = active;
+            document.getElementById("hshq-avg").textContent = "$" + avgPrice + "k";
+            document.getElementById("hshq-top").textContent = topRated ? (topRated.michelleRating + topRated.peterRating) + "/20" : "—";
+        
+            // Mini preview cards — show top 3 rated active homes
+            const topHomes = homes
+              .filter(h => !h.sold && !h.pending && !h.tooExpensive && h.photoUrl)
+              .sort((a, b) => {
+                const ra = (a.michelleRating || 0) + (a.peterRating || 0);
+                const rb = (b.michelleRating || 0) + (b.peterRating || 0);
+                return rb - ra;
+              })
+              .slice(0, 3);
+        
+            const previewEl = document.getElementById("hshq-preview");
+            previewEl.innerHTML = topHomes.map(h => {
+              const rating = (h.michelleRating || 0) + (h.peterRating || 0);
+              const status = h.sold ? "Sold" : h.pending ? "Pending" : 
+                rating >= 14 ? "Excellent" : rating >= 12 ? "Good" : rating >= 10 ? "Hmm..." : "Waiting";
+              const colors = { Excellent: "#0d6efd", Good: "#28a745", "Hmm...": "#ffc107", Waiting: "#17a2b8" };
+              const sc = colors[status] || "#17a2b8";
+              return '<div style="background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.08);border:1px solid #e8ece9">' +
+                '<div style="height:3px;background:' + sc + '"></div>' +
+                '<div style="height:90px;overflow:hidden;background:#f0f4f1"><img src="' + h.photoUrl + '" style="width:100%;height:100%;object-fit:cover" onerror="this.parentElement.style.display=\'none\'"></div>' +
+                '<div style="padding:8px 10px">' +
+                  '<div style="font-size:11px;font-weight:700;color:#2d3436;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + h.address + '</div>' +
+                  '<div style="font-size:10px;color:#636e72;margin-bottom:3px">' + h.city + (h.neighborhood ? ' · ' + h.neighborhood : '') + '</div>' +
+                  '<div style="display:flex;justify-content:space-between;align-items:center">' +
+                    '<span style="font-size:14px;font-weight:800;color:#55c278">$' + h.price.toLocaleString() + '</span>' +
+                    '<span style="font-size:9px;font-weight:600;padding:1px 6px;border-radius:4px;background:' + sc + '22;color:' + sc + '">' + status + '</span>' +
+                  '</div>' +
+                '</div></div>';
+            }).join("");
+        
+          } catch (e) {
+            console.error("HSHQ data fetch error:", e);
+          }
+        </script>
         
         <!-- Add Chart.js library before the closing body tag if not already included -->
         <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
