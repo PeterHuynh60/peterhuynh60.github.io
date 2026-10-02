@@ -11,9 +11,20 @@
     <link href="https://fonts.googleapis.com/css?family=Saira+Extra+Condensed:500,700" rel="stylesheet" type="text/css" />
     <link href="https://fonts.googleapis.com/css?family=Muli:400,400i,800,800i" rel="stylesheet" type="text/css" />
     <link href="css/styles.css" rel="stylesheet" />
-    <!-- Firebase SDKs -->
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <!-- PocketBase SDK (powers the B.E.T. and Home Search HQ dashboard widgets below) -->
+    <script src="https://cdn.jsdelivr.net/npm/pocketbase@0.25.1/dist/pocketbase.umd.js"></script>
+    <script>
+      // Applied before first paint so a returning visitor who picked dark
+      // doesn't see a flash of the light theme first. Default (no saved
+      // choice) follows the OS/browser preference.
+      (function () {
+        try {
+          var saved = localStorage.getItem("theme");
+          var wantsDark = saved ? saved === "dark" : window.matchMedia("(prefers-color-scheme: dark)").matches;
+          if (wantsDark) document.documentElement.setAttribute("data-theme", "dark");
+        } catch (e) {}
+      })();
+    </script>
 </head>
 <body id="page-top">
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top" id="sideNav">
@@ -32,6 +43,12 @@
                 <li class="nav-item"><a class="nav-link js-scroll-trigger" href="#projects">Projects</a></li>
                 <li class="nav-item"><a class="nav-link js-scroll-trigger" href="#dashboards">Dashboards</a></li>
                 <li class="nav-item"><a class="nav-link js-scroll-trigger" href="#blog">Blog</a></li>
+                <li class="nav-item">
+                    <button id="theme-toggle" class="theme-toggle-btn" type="button" aria-label="Toggle dark mode" title="Toggle dark mode">
+                        <span class="theme-toggle-icon-light">🌙</span>
+                        <span class="theme-toggle-icon-dark">☀️</span>
+                    </button>
+                </li>
             </ul>
         </div>
     </nav>
@@ -207,16 +224,23 @@
                 
                 <div class="mb-3">
                     <p class="mb-0"><strong><a href="https://bet.huynh.place" target="_blank">Binary Expected-Value Tool (B.E.T.)</a>:</strong></p>
-                    <div>A comprehensive analytics dashboard for tracking and analyzing sports betting strategies across multiple sportsbooks. Implements probability theory and expected value calculations to monitor performance metrics including win rate, profit margins, and ROI across different betting types (matched betting, promotion harvesting, and positive EV strategies). Features real-time data visualization through Chart.js, Firebase integration for secure data storage, and bankroll management tools. Deployed as a Progressive Web App (PWA) with offline functionality for mobile access. Demonstrates proficiency in statistical analysis, risk management, financial modeling, and full-stack web development.</div>
+                    <div>A comprehensive analytics dashboard for tracking and analyzing sports betting strategies across multiple sportsbooks. Implements probability theory and expected value calculations to monitor performance metrics including win rate, profit margins, and ROI across different betting types (matched betting, promotion harvesting, and positive EV strategies). Features real-time data visualization through Chart.js, a self-hosted PocketBase backend for data storage and auth, and bankroll management tools. Deployed as a Progressive Web App (PWA) with offline functionality for mobile access. Demonstrates proficiency in statistical analysis, risk management, financial modeling, and full-stack web development.</div>
                 </div>
 
                 <div class="mb-3">
                     <p class="mb-0"><strong><a href="https://home.huynh.place" target="_blank">Home Search HQ</a>:</strong></p>
-                    <div>A real-time property search dashboard built to streamline the Denver home-buying process. Features automated listing extraction via Claude AI with web search, Google Maps commute calculations to UCHealth Anschutz Campus, dual rating systems for both partners, dynamic mortgage parameter modeling, and interactive map visualization with status-colored pins. Supports passcode-protected edit mode, automated status ratings based on combined scores, and responsive design for mobile browsing. Built with React, Firebase (Firestore, Auth, Cloud Functions), Google Maps API, and Claude API. Deployed on GitHub Pages with a custom domain.</div>
+                    <div>A real-time property search dashboard built to streamline the Denver home-buying process — successfully used to find and buy our home. Features automated listing extraction via Claude AI with web search, Google Maps commute calculations to UCHealth Anschutz Campus, dual rating systems for both partners, dynamic mortgage parameter modeling, and interactive map visualization with status-colored pins. Supports passcode-protected edit mode, automated status ratings based on combined scores, and responsive design for mobile browsing. Built with React and a self-hosted PocketBase backend, with a small Node service handling the Claude and Google Maps API integrations. Self-hosted with a custom domain.</div>
                 </div>
                 
                 <div class="mb-5"></div>
-                
+
+                <h3 class="mb-3">Home Server &amp; Self-Hosted Infrastructure</h3>
+
+                <div class="mb-5">
+                    <p class="mb-0"><strong>Unraid Home Server:</strong></p>
+                    <div>Migrated this entire portfolio of dashboards off third-party cloud services (Firebase, GitHub Pages) onto a self-hosted Unraid server running entirely on my home network. Runs PocketBase as a shared auth/database backend across all dashboards, Nginx Proxy Manager for reverse-proxying and automated SSL, AdGuard Home for network-wide DNS and local service resolution, and Docker containers for every service. Personal cloud services (Immich for photos, Nextcloud for files) are locked down to only be reachable over my home network or WireGuard VPN, with IP-based access rules enforced at the proxy layer. Also hosts Plex and a modded Minecraft server via Crafty Controller. Demonstrates Linux systems administration, Docker containerization, reverse-proxy and DNS configuration, and practical network security hardening.</div>
+                </div>
+
                 <h3 class="mb-3"><a href="https://drive.google.com/drive/folders/10Ybw_5lCwMTDknM1fhHTa_LDLwqcnXBe?usp=sharing" target="_blank">3D Design Projects</a></h3>
         
                 <div class="mb-3">
@@ -237,18 +261,6 @@
                 <div class="mb-5">
                     <p class="mb-0"><strong><a href="https://drive.google.com/drive/folders/1xS1L5u3OZ4w9FH6gtKl0Z2Rp5Yj3DCU2?usp=drive_link" target="_blank">Ventilation Panels</a>:</strong></p>
                     <div>Designed to expel volatile organic compounds (VOCs) from the 3D printer, directing harmful emissions outside the home through window-mounted ventilation.</div>
-                </div>
-        
-                <h3 class="mb-3"><a href="https://drive.google.com/drive/folders/1I-lpuvYJ92jVZhCYZZVitroYIVo7jeXM?usp=sharing" target="_blank">Spreadsheet Models</a></h3>
-                
-                <div class="mb-3">
-                    <p class="mb-0"><strong><a href="https://docs.google.com/spreadsheets/d/1_dh5wS2BfH2VnRI28XM0NfSdk3oJN-qZqPZvcn2PUiY/edit?usp=drive_link" target="_blank">Betting Scoreboard</a>:</strong></p>
-                    <div>Tracks the history of matched betting on multiple sportsbooks. Generated $11,500 in profit through sharp betting strategies, including matched betting, promotion harvesting, and positive-expected value betting.</div>
-                </div>
-                
-                <div class="mb-5">
-                    <p class="mb-0"><strong><a href="https://docs.google.com/spreadsheets/d/1t1PC6mr5xaKgNdAwVjrtqbOsmJ6otCz-aSoFGm2SAVs/edit?usp=drive_link" target="_blank">Take-Home Pay Calculator</a>:</strong></p>
-                    <div>Interactive financial planning tool that estimates net income and long-term savings outcomes based on customizable variables, including location, salary, retirement contributions, and tax withholdings.</div>
                 </div>
         
                 <h3 class="mb-3"><a href="https://www.notion.so/07a5b9015c5948c498700ccae752bf61?v=bf86ec5c0963447a83af442bfb4e1adc&source=copy_link" target="_blank">Experimental Recipes</a></h3>
@@ -286,7 +298,7 @@
 
         <hr class="m-0" />
         
-        <section class="resume-section" id="dashboards">
+        <section class="resume-section dashboard-section-compact" id="dashboards">
             <div class="resume-section-content">
                 <h2 class="mb-5">Binary Expected-Value Tool (B.E.T.)</h2>
                 
@@ -347,7 +359,7 @@
 
         <hr class="m-0" />
 
-        <section class="resume-section">
+        <section class="resume-section dashboard-section-compact">
             <div class="resume-section-content">
                 <h2 class="mb-5">Home Search HQ</h2>
                 
@@ -399,32 +411,19 @@
             </div>
         </section>
         <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
-        // Firebase Configuration
-        const firebaseConfig = {
-          apiKey: "AIzaSyBLj4AYOc39hIaFAPKQrumsifP7bbyJ5To",
-          authDomain: "betting-dashboard-c224e.firebaseapp.com",
-          projectId: "betting-dashboard-c224e",
-          storageBucket: "betting-dashboard-c224e.firebasestorage.app",
-          messagingSenderId: "416492918120",
-          appId: "1:416492918120:web:e52afea521a508a89cf2dd"
-        };
-        
-        // Initialize Firebase
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
-        
-        // Disable persistence/caching to always get fresh data
-        db.settings({
-            cacheSizeBytes: firebase.firestore.CACHE_SIZE_UNLIMITED
-        });
-        
-        // Summary Dashboard JavaScript
+        // Summary Dashboard JavaScript — reads from the self-hosted PocketBase
+        // instance that now backs bet.huynh.place (public read, no auth needed).
+        const betPb = new PocketBase("https://data.huynh.place");
+
         (async function() {
             try {
-                // Fetch all bets from Firestore (force from server, not cache)
-                const snapshot = await db.collection('bets').get({ source: 'server' });
-                
-                if (snapshot.empty) {
+                const bets = (await betPb.collection('bets').getFullList()).map(function(b) {
+                    // PocketBase stores date as a full timestamp ("YYYY-MM-DD HH:mm:ss.sssZ");
+                    // normalize to plain "YYYY-MM-DD" for the date-grouping/formatting below.
+                    return Object.assign({}, b, { date: (b.date || '').slice(0, 10) });
+                });
+
+                if (bets.length === 0) {
                     console.log('No betting data found');
                     document.getElementById('summary-total-earnings').textContent = '$0.00';
                     document.getElementById('summary-total-bets').textContent = '0';
@@ -432,24 +431,9 @@
                     document.getElementById('summary-best-win').textContent = '0.00';
                     return;
                 }
-                
-                // Parse bets from Firestore
-                const bets = [];
-                snapshot.forEach(doc => {
-                    try {
-                        const bet = JSON.parse(doc.data().value);
-                        bets.push(bet);
-                    } catch (err) {
-                        console.error('Error parsing bet:', err);
-                    }
-                });
-                
+
                 console.log('Summary: Total bets loaded:', bets.length);
                 console.log('Summary: Completed bets:', bets.filter(bet => bet.result !== 'Pending').length);
-                
-                if (bets.length === 0) {
-                    return;
-                }
                 
                 // Filter only completed bets for statistics
                 const completedBets = bets.filter(bet => bet.result !== 'Pending');
@@ -750,26 +734,32 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-easing/1.4.1/jquery.easing.min.js"></script>
     <script src="js/scripts.js"></script>
 
-    <!-- Home Search HQ Dashboard Data -->
+    <!-- Dark mode toggle -->
+    <script>
+    (function () {
+        var btn = document.getElementById("theme-toggle");
+        btn.addEventListener("click", function () {
+            var isDark = document.documentElement.getAttribute("data-theme") === "dark";
+            if (isDark) {
+                document.documentElement.removeAttribute("data-theme");
+                localStorage.setItem("theme", "light");
+            } else {
+                document.documentElement.setAttribute("data-theme", "dark");
+                localStorage.setItem("theme", "dark");
+            }
+        });
+    })();
+    </script>
+
+    <!-- Home Search HQ Dashboard Data — reads from the self-hosted PocketBase
+         instance that now backs home.huynh.place (public read, no auth needed). -->
     <script>
     (function() {
-        var hshqConfig = {
-            apiKey: "AIzaSyAIItpT-SoHxB2Y6jhGtUmy2o6s2z_HiAM",
-            authDomain: "home-search-hq.firebaseapp.com",
-            projectId: "home-search-hq",
-            storageBucket: "home-search-hq.firebasestorage.app",
-            messagingSenderId: "631504248905",
-            appId: "1:631504248905:web:d4fbdc6f73580904445f98"
-        };
-        var hshqApp = firebase.initializeApp(hshqConfig, "hshq");
-        var hshqDb = hshqApp.firestore();
+        var hshqPb = new PocketBase("https://data.huynh.place");
 
-        hshqDb.collection("homes").get().then(function(snap) {
-            var homes = [];
-            snap.forEach(function(doc) { homes.push(Object.assign({ id: doc.id }, doc.data())); });
-
+        hshqPb.collection("homes").getFullList().then(function(homes) {
             var total = homes.length;
-            var active = homes.filter(function(h) { return !h.sold && !h.pending && !h.tooExpensive; }).length;
+            var active = homes.filter(function(h) { return !h.sold && !h.pending && !h.tooExpensive && !h.bought; }).length;
             var prices = homes.map(function(h) { return h.price; }).filter(function(p) { return p > 0; });
             var avgPrice = prices.length ? Math.round(prices.reduce(function(a, b) { return a + b; }, 0) / prices.length / 1000) : 0;
 
@@ -782,32 +772,40 @@
             document.getElementById("hshq-avg").textContent = "$" + avgPrice + "k";
             document.getElementById("hshq-top").textContent = topScore;
 
-            // Mini preview cards - top 3 rated active homes with photos
+            // The bought home (if any) always leads, denoted with its own ribbon —
+            // it's the actual result of the whole search, not just another candidate.
+            var boughtHome = homes.find(function(h) { return h.bought && h.photoUrl; });
+
+            // Otherwise, top 3 rated active homes with photos
             var topHomes = homes
-                .filter(function(h) { return !h.sold && !h.pending && !h.tooExpensive && h.photoUrl; })
+                .filter(function(h) { return !h.bought && !h.sold && !h.pending && !h.tooExpensive && h.photoUrl; })
                 .sort(function(a, b) {
                     return ((b.michelleRating || 0) + (b.peterRating || 0)) - ((a.michelleRating || 0) + (a.peterRating || 0));
                 })
-                .slice(0, 3);
+                .slice(0, boughtHome ? 2 : 3);
+
+            var previewHomes = boughtHome ? [boughtHome].concat(topHomes) : topHomes;
 
             var previewRow = document.getElementById("hshq-preview-row");
-            topHomes.forEach(function(h) {
+            previewHomes.forEach(function(h) {
+                var isBought = !!h.bought;
                 var rating = (h.michelleRating || 0) + (h.peterRating || 0);
-                var status = rating >= 14 ? "Excellent" : rating >= 12 ? "Good" : rating >= 10 ? "Hmm..." : "Waiting";
-                var colors = { Excellent: "#0d6efd", Good: "#28a745", "Hmm...": "#ffc107", Waiting: "#17a2b8" };
+                var status = isBought ? "Bought" : rating >= 14 ? "Excellent" : rating >= 12 ? "Good" : rating >= 10 ? "Hmm..." : "Waiting";
+                var colors = { Bought: "#20c997", Excellent: "#0d6efd", Good: "#28a745", "Hmm...": "#ffc107", Waiting: "#17a2b8" };
                 var sc = colors[status] || "#17a2b8";
 
                 var col = document.createElement("div");
                 col.className = "col-lg-4 col-md-4 mb-4";
-                col.innerHTML = '<div class="card" style="overflow:hidden">' +
-                    '<div style="height:3px;background:' + sc + '"></div>' +
+                col.innerHTML = '<div class="card" style="overflow:hidden' + (isBought ? ';border-color:' + sc + ';border-width:2px' : '') + '">' +
+                    (isBought ? '<div style="background:' + sc + ';color:#fff;font-size:11px;font-weight:700;letter-spacing:0.05em;text-align:center;padding:4px">🏡 WE BOUGHT THIS HOME</div>' :
+                        '<div style="height:3px;background:' + sc + '"></div>') +
                     '<div style="height:120px;overflow:hidden;background:#f0f4f1"><img src="' + h.photoUrl + '" style="width:100%;height:100%;object-fit:cover" onerror="this.parentElement.style.display=\'none\'"></div>' +
                     '<div class="card-body" style="padding:12px">' +
                         '<h6 class="card-title mb-1" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + h.address + '</h6>' +
                         '<p class="text-muted mb-1" style="font-size:12px">' + h.city + (h.neighborhood ? ' &middot; ' + h.neighborhood : '') + '</p>' +
                         '<div class="d-flex justify-content-between align-items-center">' +
                             '<span class="text-success" style="font-size:18px;font-weight:800">$' + h.price.toLocaleString() + '</span>' +
-                            '<span style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:4px;background:' + sc + '22;color:' + sc + '">' + status + '</span>' +
+                            (isBought ? '' : '<span style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:4px;background:' + sc + '22;color:' + sc + '">' + status + '</span>') +
                         '</div>' +
                     '</div></div>';
                 previewRow.appendChild(col);

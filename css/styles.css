@@ -10133,3 +10133,119 @@ section.resume-section .resume-section-content {
     padding-bottom: 5rem;
   }
 }
+
+/* Dashboard summary sections (B.E.T., Home Search HQ) are compact widgets,
+   not full-page resume sections — they don't need the 100vh full-page feel,
+   and stacking two of them back-to-back with that spacing left a lot of
+   dead space between them. */
+section.resume-section.dashboard-section-compact {
+  padding-top: 2rem;
+  padding-bottom: 2rem;
+  min-height: 0;
+}
+@media (min-width: 768px) {
+  section.resume-section.dashboard-section-compact {
+    min-height: 0;
+  }
+}
+
+/* ===================================================================
+   Dark mode toggle + theme
+   =================================================================== */
+.theme-toggle-btn {
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 999px;
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 18px;
+  line-height: 1;
+  padding: 0;
+  margin: 0.5rem 0;
+  transition: background 0.2s ease;
+}
+.theme-toggle-btn:hover {
+  background: rgba(255, 255, 255, 0.28);
+}
+.theme-toggle-btn .theme-toggle-icon-dark {
+  display: none;
+}
+[data-theme="dark"] .theme-toggle-btn .theme-toggle-icon-light {
+  display: none;
+}
+[data-theme="dark"] .theme-toggle-btn .theme-toggle-icon-dark {
+  display: inline;
+}
+
+/* Base surface + text colors */
+[data-theme="dark"] body {
+  background-color: #121417;
+  color: #d8dade;
+}
+[data-theme="dark"] .resume-section-content h1,
+[data-theme="dark"] .resume-section-content h2,
+[data-theme="dark"] .resume-section-content h3,
+[data-theme="dark"] .resume-section-content h4,
+[data-theme="dark"] .resume-section-content h5,
+[data-theme="dark"] .resume-section-content h6,
+[data-theme="dark"] .resume-section-content p,
+[data-theme="dark"] .resume-section-content div,
+[data-theme="dark"] .resume-section-content span {
+  color: #d8dade;
+}
+[data-theme="dark"] .text-muted {
+  color: #9a9fa8 !important;
+}
+[data-theme="dark"] hr {
+  border-color: #2a2d33;
+}
+[data-theme="dark"] .resume-section {
+  border-color: #2a2d33;
+}
+
+/* Links / contextual text colors stay saturated enough to read on dark,
+   but bump them slightly for contrast against the darker background. */
+[data-theme="dark"] a {
+  color: #6fd694;
+}
+[data-theme="dark"] a:hover {
+  color: #8fe0ac;
+}
+[data-theme="dark"] .text-primary {
+  color: #6fd694 !important;
+}
+
+/* Sidebar nav: bg-primary already reads fine in dark mode as-is */
+[data-theme="dark"] .social-icons .social-icon {
+  background-color: #1c1f24;
+  color: #d8dade;
+}
+[data-theme="dark"] .social-icons .social-icon:hover {
+  background-color: #2a2d33;
+}
+
+/* Cards (dashboard stat tiles, mini property preview cards) */
+[data-theme="dark"] .card {
+  background-color: #1a1d22;
+  border-color: #2a2d33;
+}
+[data-theme="dark"] .card-title.text-muted {
+  color: #9a9fa8 !important;
+}
+
+/* Blog post collapse sections */
+[data-theme="dark"] .collapse {
+  color: #d8dade;
+}
+
+/* Form controls, in case any are visible (none currently on this page,
+   kept for safety if the Projects/Blog sections gain one later) */
+[data-theme="dark"] .form-control {
+  background-color: #1a1d22;
+  border-color: #2a2d33;
+  color: #d8dade;
+}
