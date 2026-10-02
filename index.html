@@ -757,13 +757,15 @@
     (function() {
         var hshqPb = new PocketBase("https://data.huynh.place");
 
-        // The bought home (our real address) isn't publicly readable from "homes"; its
-        // address-free summary comes from the homes_bought_public view instead.
+        // The bought home (our real address) and private listings (e.g. other units in our
+        // building) aren't publicly readable from "homes"; their address-free summaries come
+        // from the homes_masked_public view and are shown without address, photo or link.
         Promise.all([
             hshqPb.collection("homes").getFullList(),
-            hshqPb.collection("homes_bought_public").getFullList().catch(function() { return []; })
+            hshqPb.collection("homes_masked_public").getFullList().catch(function() { return []; })
         ]).then(function(res) {
-            var homes = res[0].concat(res[1]);
+            var masked = res[1].map(function(h) { h.masked = true; return h; });
+            var homes = res[0].concat(masked);
             var total = homes.length;
             var active = homes.filter(function(h) { return !h.sold && !h.pending && !h.tooExpensive && !h.bought; }).length;
             var prices = homes.map(function(h) { return h.price; }).filter(function(p) { return p > 0; });
@@ -780,12 +782,11 @@
 
             // The bought home (if any) always leads, denoted with its own ribbon —
             // it's the actual result of the whole search, not just another candidate.
-            // Shown without address, photo or link to keep where we live private.
             var boughtHome = homes.find(function(h) { return h.bought; });
 
-            // Otherwise, top 3 rated active homes with photos
+            // Otherwise, top 3 rated active homes with photos (masked ones have no photo by design)
             var topHomes = homes
-                .filter(function(h) { return !h.bought && !h.sold && !h.pending && !h.tooExpensive && h.photoUrl; })
+                .filter(function(h) { return !h.bought && !h.sold && !h.pending && !h.tooExpensive && (h.photoUrl || h.masked); })
                 .sort(function(a, b) {
                     return ((b.michelleRating || 0) + (b.peterRating || 0)) - ((a.michelleRating || 0) + (a.peterRating || 0));
                 })
@@ -806,10 +807,10 @@
                 col.innerHTML = '<div class="card" style="overflow:hidden' + (isBought ? ';border-color:' + sc + ';border-width:2px' : '') + '">' +
                     (isBought ? '<div style="background:' + sc + ';color:#fff;font-size:11px;font-weight:700;letter-spacing:0.05em;text-align:center;padding:4px">🏡 WE BOUGHT THIS HOME</div>' :
                         '<div style="height:3px;background:' + sc + '"></div>') +
-                    (isBought ? '<div style="height:120px;display:flex;align-items:center;justify-content:center;font-size:48px;background:' + sc + '22">🏡</div>' :
+                    (h.masked ? '<div style="height:120px;display:flex;align-items:center;justify-content:center;font-size:48px;background:' + sc + '22">' + (isBought ? '🏡' : '🔒') + '</div>' :
                         '<div style="height:120px;overflow:hidden;background:#f0f4f1"><img src="' + h.photoUrl + '" style="width:100%;height:100%;object-fit:cover" onerror="this.parentElement.style.display=\'none\'"></div>') +
                     '<div class="card-body" style="padding:12px">' +
-                        '<h6 class="card-title mb-1" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + (isBought ? 'Our Home' : h.address) + '</h6>' +
+                        '<h6 class="card-title mb-1" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + (isBought ? 'Our Home' : h.masked ? 'Private listing' : h.address) + '</h6>' +
                         '<p class="text-muted mb-1" style="font-size:12px">' + h.city + (h.neighborhood ? ' &middot; ' + h.neighborhood : '') + '</p>' +
                         '<div class="d-flex justify-content-between align-items-center">' +
                             '<span class="text-success" style="font-size:18px;font-weight:800">$' + h.price.toLocaleString() + '</span>' +
