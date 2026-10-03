@@ -10213,6 +10213,42 @@ section.resume-section .resume-section-content {
   transform: rotate(180deg);
 }
 
+/* 3D design viewers (<model-viewer>) under each 3D Design project */
+.design-project {
+  margin-bottom: 3rem;
+}
+.model-row {
+  margin-top: 1.25rem;
+}
+.model-card {
+  margin: 0 0 1rem;
+  border: 1px solid #dee2e6;
+  border-radius: 0.75rem;
+  overflow: hidden;
+  background: radial-gradient(circle at 50% 35%, #ffffff 0%, #eef6f1 100%);
+}
+.model-card model-viewer {
+  display: block;
+  width: 100%;
+  height: 340px;
+  --poster-color: transparent;
+}
+.model-card figcaption {
+  padding: 0.5rem 0.75rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #6c757d;
+  border-top: 1px solid #dee2e6;
+}
+[data-theme="dark"] .model-card {
+  border-color: #2a2d33;
+  background: radial-gradient(circle at 50% 35%, #2a2f36 0%, #16191d 100%);
+}
+[data-theme="dark"] .model-card figcaption {
+  color: #9a9fa8;
+  border-top-color: #2a2d33;
+}
+
 /* Compact live dashboard widgets (B.E.T., Home Search HQ) shown under their
    project descriptions; the full dashboards are one click away. */
 .mini-dash {
