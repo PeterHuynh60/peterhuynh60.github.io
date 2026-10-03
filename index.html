@@ -45,9 +45,9 @@
                     <a class="nav-link js-scroll-trigger" href="#projects">Projects</a>
                     <!-- Opens (via scrollspy's .active on the Projects link) while scrolling through Projects -->
                     <ul class="nav flex-column project-subnav">
+                        <li class="nav-item"><a class="nav-link js-scroll-trigger" href="#projects-3d">3D Design</a></li>
                         <li class="nav-item"><a class="nav-link js-scroll-trigger" href="#projects-dashboards">Dashboards</a></li>
                         <li class="nav-item"><a class="nav-link js-scroll-trigger" href="#projects-server">Home Server</a></li>
-                        <li class="nav-item"><a class="nav-link js-scroll-trigger" href="#projects-3d">3D Design</a></li>
                         <li class="nav-item"><a class="nav-link js-scroll-trigger" href="#projects-recipes">Recipes</a></li>
                     </ul>
                 </li>
@@ -198,6 +198,65 @@
             <div class="resume-section-content">
                 <h2 class="mb-5">Projects</h2>
                 
+                <h3 class="mb-3 project-group" id="projects-3d">3D Design Projects</h3>
+        
+                <!-- Interactive 3D viewers (<model-viewer>, loaded in <head>); models are web-optimized GLBs in assets/models/ -->
+                <div class="design-project">
+                    <p class="mb-0"><strong>Custom LEGO Bookends:</strong></p>
+                    <div>Personalized commemorative display piece celebrating relationship milestones, featuring custom-built vignettes representing career achievements and shared interests. Design inspired by LEGO's Wicked Glinda & Elphaba Bookends (75691).</div>
+                    <div class="row model-row">
+                        <div class="col-md-6">
+                            <figure class="model-card">
+                                <model-viewer src="assets/models/bookend-michelle.glb" alt="3D model of Michelle's LEGO bookend" camera-controls auto-rotate rotation-per-second="18deg" camera-orbit="35deg 75deg auto" shadow-intensity="1" exposure="1.1" loading="lazy" touch-action="pan-y" ar ar-modes="webxr scene-viewer quick-look"></model-viewer>
+                                <figcaption>Michelle's bookend</figcaption>
+                            </figure>
+                        </div>
+                        <div class="col-md-6">
+                            <figure class="model-card">
+                                <model-viewer src="assets/models/bookend-peter.glb" alt="3D model of Peter's LEGO bookend" camera-controls auto-rotate rotation-per-second="18deg" camera-orbit="35deg 75deg auto" shadow-intensity="1" exposure="1.1" loading="lazy" touch-action="pan-y" ar ar-modes="webxr scene-viewer quick-look"></model-viewer>
+                                <figcaption>Peter's bookend</figcaption>
+                            </figure>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="design-project">
+                    <p class="mb-0"><strong>Computer Cooling Solution:</strong></p>
+                    <div>Custom duct adapter designed to redirect computer exhaust airflow through ventilation ducting, improving thermal management and reducing ambient heat in the workspace.</div>
+                    <div class="row model-row">
+                        <div class="col-md-8 col-lg-6">
+                            <figure class="model-card">
+                                <model-viewer src="assets/models/cooling-fan-duct.glb" alt="3D model of the computer exhaust duct adapter" camera-controls auto-rotate rotation-per-second="18deg" camera-orbit="35deg 70deg auto" shadow-intensity="1" exposure="1.1" loading="lazy" touch-action="pan-y" ar ar-modes="webxr scene-viewer quick-look"></model-viewer>
+                            </figure>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="design-project">
+                    <p class="mb-0"><strong>Ventilation Panels:</strong></p>
+                    <div>Designed to expel volatile organic compounds (VOCs) from the 3D printer, directing harmful emissions outside the home through window-mounted ventilation.</div>
+                    <div class="row model-row">
+                        <div class="col-md-4">
+                            <figure class="model-card">
+                                <model-viewer src="assets/models/window-base-layer.glb" alt="3D model of the window port base layer" camera-controls auto-rotate rotation-per-second="18deg" camera-orbit="30deg 60deg auto" shadow-intensity="1" exposure="1.1" loading="lazy" touch-action="pan-y" ar ar-modes="webxr scene-viewer quick-look"></model-viewer>
+                                <figcaption>Base layer</figcaption>
+                            </figure>
+                        </div>
+                        <div class="col-md-4">
+                            <figure class="model-card">
+                                <model-viewer src="assets/models/window-middle-layer.glb" alt="3D model of the window port middle layer" camera-controls auto-rotate rotation-per-second="18deg" camera-orbit="30deg 60deg auto" shadow-intensity="1" exposure="1.1" loading="lazy" touch-action="pan-y" ar ar-modes="webxr scene-viewer quick-look"></model-viewer>
+                                <figcaption>Middle and top layers</figcaption>
+                            </figure>
+                        </div>
+                        <div class="col-md-4">
+                            <figure class="model-card">
+                                <model-viewer src="assets/models/window-exhaust-port-base.glb" alt="3D model of the window port exhaust port base" camera-controls auto-rotate rotation-per-second="18deg" camera-orbit="30deg 60deg auto" shadow-intensity="1" exposure="1.1" loading="lazy" touch-action="pan-y" ar ar-modes="webxr scene-viewer quick-look"></model-viewer>
+                                <figcaption>Exhaust port base</figcaption>
+                            </figure>
+                        </div>
+                    </div>
+                </div>
+        
                 <h3 class="mb-3 project-group" id="projects-dashboards">Dashboards</h3>
 
                 <div class="dash-project">
@@ -246,66 +305,6 @@
                     <div>Migrated this entire portfolio of dashboards off third-party cloud services (Firebase, GitHub Pages) onto a self-hosted Unraid server running entirely on my home network. Runs PocketBase as a shared auth/database backend across all dashboards, Nginx Proxy Manager for reverse-proxying and automated SSL, AdGuard Home for network-wide DNS and local service resolution, and Docker containers for every service. Personal cloud services (Immich for photos, Nextcloud for files) are locked down to only be reachable over my home network or WireGuard VPN, with IP-based access rules enforced at the proxy layer. Also hosts Plex and a modded Minecraft server via Crafty Controller. Demonstrates Linux systems administration, Docker containerization, reverse-proxy and DNS configuration, and practical network security hardening.</div>
                 </div>
 
-                <h3 class="mb-3 project-group" id="projects-3d">3D Design Projects</h3>
-        
-                <!-- Interactive 3D viewers (<model-viewer>, loaded in <head>); models are web-optimized GLBs in assets/models/ -->
-                <div class="design-project">
-                    <p class="mb-0"><strong>Custom LEGO Bookends:</strong></p>
-                    <div>Personalized commemorative display piece celebrating relationship milestones, featuring custom-built vignettes representing career achievements and shared interests. Design inspired by LEGO's Wicked Glinda & Elphaba Bookends (75691).</div>
-                    <div class="row model-row">
-                        <div class="col-md-6">
-                            <figure class="model-card">
-                                <model-viewer src="assets/models/bookend-michelle.glb" alt="3D model of Michelle's LEGO bookend" camera-controls auto-rotate rotation-per-second="18deg" camera-orbit="35deg 75deg auto" shadow-intensity="1" exposure="1.1" loading="lazy" touch-action="pan-y" ar ar-modes="webxr scene-viewer quick-look"></model-viewer>
-                                <figcaption>Michelle's bookend</figcaption>
-                            </figure>
-                        </div>
-                        <div class="col-md-6">
-                            <figure class="model-card">
-                                <model-viewer src="assets/models/bookend-peter.glb" alt="3D model of Peter's LEGO bookend" camera-controls auto-rotate rotation-per-second="18deg" camera-orbit="35deg 75deg auto" shadow-intensity="1" exposure="1.1" loading="lazy" touch-action="pan-y" ar ar-modes="webxr scene-viewer quick-look"></model-viewer>
-                                <figcaption>Peter's bookend</figcaption>
-                            </figure>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="design-project">
-                    <p class="mb-0"><strong>Computer Cooling Solution:</strong></p>
-                    <div>Custom duct adapter designed to redirect computer exhaust airflow through ventilation ducting, improving thermal management and reducing ambient heat in the workspace.</div>
-                    <div class="row model-row">
-                        <div class="col-md-8 col-lg-6">
-                            <figure class="model-card">
-                                <model-viewer src="assets/models/cooling-fan-duct.glb" alt="3D model of the computer exhaust duct adapter" camera-controls auto-rotate rotation-per-second="18deg" camera-orbit="35deg 70deg auto" shadow-intensity="1" exposure="1.1" loading="lazy" touch-action="pan-y" ar ar-modes="webxr scene-viewer quick-look"></model-viewer>
-                                <figcaption>Exhaust duct adapter</figcaption>
-                            </figure>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="design-project">
-                    <p class="mb-0"><strong>Ventilation Panels:</strong></p>
-                    <div>Designed to expel volatile organic compounds (VOCs) from the 3D printer, directing harmful emissions outside the home through window-mounted ventilation.</div>
-                    <div class="row model-row">
-                        <div class="col-md-4">
-                            <figure class="model-card">
-                                <model-viewer src="assets/models/window-base-layer.glb" alt="3D model of the window port base layer" camera-controls auto-rotate rotation-per-second="18deg" camera-orbit="30deg 60deg auto" shadow-intensity="1" exposure="1.1" loading="lazy" touch-action="pan-y" ar ar-modes="webxr scene-viewer quick-look"></model-viewer>
-                                <figcaption>Base layer</figcaption>
-                            </figure>
-                        </div>
-                        <div class="col-md-4">
-                            <figure class="model-card">
-                                <model-viewer src="assets/models/window-middle-layer.glb" alt="3D model of the window port middle layer" camera-controls auto-rotate rotation-per-second="18deg" camera-orbit="30deg 60deg auto" shadow-intensity="1" exposure="1.1" loading="lazy" touch-action="pan-y" ar ar-modes="webxr scene-viewer quick-look"></model-viewer>
-                                <figcaption>Middle layer</figcaption>
-                            </figure>
-                        </div>
-                        <div class="col-md-4">
-                            <figure class="model-card">
-                                <model-viewer src="assets/models/window-exhaust-port-base.glb" alt="3D model of the window port exhaust port base" camera-controls auto-rotate rotation-per-second="18deg" camera-orbit="30deg 60deg auto" shadow-intensity="1" exposure="1.1" loading="lazy" touch-action="pan-y" ar ar-modes="webxr scene-viewer quick-look"></model-viewer>
-                                <figcaption>Exhaust port base</figcaption>
-                            </figure>
-                        </div>
-                    </div>
-                </div>
-        
                 <h3 class="mb-3 project-group" id="projects-recipes"><a href="https://www.notion.so/07a5b9015c5948c498700ccae752bf61?v=bf86ec5c0963447a83af442bfb4e1adc&source=copy_link" target="_blank">Experimental Recipes</a></h3>
         
                 <div class="mb-3">
