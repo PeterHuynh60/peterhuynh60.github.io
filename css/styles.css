@@ -10153,8 +10153,16 @@ section.resume-section .resume-section-content {
   margin-top: 0.1rem;
   margin-bottom: 0.4rem;
 }
+/* Clicking another top-level section closes the submenu immediately, even if
+   the scroll animation passes through Projects on the way. */
+#sideNav.subnav-closed .nav-link.active + .project-subnav {
+  max-height: 0;
+  opacity: 0;
+  margin-top: 0;
+  margin-bottom: 0;
+}
 #sideNav .navbar-nav .project-subnav .nav-item .nav-link {
-  font-size: 0.8rem;
+  font-size: 0.7rem;
   font-weight: 600;
   letter-spacing: 0.02rem;
   text-transform: none;
@@ -10178,7 +10186,24 @@ section.resume-section .resume-section-content {
   margin-bottom: 3rem;
 }
 .dash-toggle {
-  margin-top: 0.75rem;
+  margin: 1.25rem 0;
+  padding: 0.45rem 1.2rem;
+  border-width: 2px;
+  border-radius: 999px;
+  font-weight: 700;
+  background-color: rgba(85, 194, 120, 0.1);
+  box-shadow: 0 2px 8px rgba(85, 194, 120, 0.25);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease, color 0.15s ease;
+}
+.dash-toggle:hover,
+.dash-toggle:focus {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(85, 194, 120, 0.35);
+}
+.dash-toggle + .collapse .mini-dash,
+.dash-toggle + .collapsing .mini-dash {
+  margin-top: 0;
+  margin-bottom: 1.25rem;
 }
 .dash-toggle .dash-caret {
   display: inline-block;

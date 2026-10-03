@@ -495,6 +495,23 @@
         var chart = window.Chart && Chart.getChart("summary-chart");
         if (chart) chart.resize();
     });
+
+    // Clicking a top-level sidebar item other than Projects closes the Projects
+    // submenu right away (and keeps it closed while the scroll animation passes
+    // through Projects); clicking Projects or one of its items lets it open again.
+    (function () {
+        var nav = $("#sideNav"), timer;
+        nav.find(".navbar-nav > .nav-item > .nav-link").on("click", function () {
+            var leavingProjects = $(this).attr("href") !== "#projects";
+            nav.toggleClass("subnav-closed", leavingProjects);
+            clearTimeout(timer);
+            if (leavingProjects) timer = setTimeout(function () { nav.removeClass("subnav-closed"); }, 1100);
+        });
+        nav.find(".project-subnav .nav-link").on("click", function () {
+            clearTimeout(timer);
+            nav.removeClass("subnav-closed");
+        });
+    })();
     </script>
 
     <!-- Dark mode toggle -->
