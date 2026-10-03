@@ -124,6 +124,9 @@
                     <div class="flex-shrink-0"><span class="text-primary">June 2022 - June 2024</span></div>
                 </div>
 
+                <!-- Older roles are collapsed behind a "See Older" toggle -->
+                <button class="btn btn-outline-primary btn-sm dash-toggle older-toggle collapsed" type="button" data-toggle="collapse" data-target="#older-experience" aria-expanded="false" aria-controls="older-experience"><span class="when-closed">See Older</span><span class="when-open">Hide Older</span> <span class="dash-caret">▾</span></button>
+                <div class="collapse" id="older-experience">
                 <div class="d-flex flex-column flex-md-row justify-content-between mb-5">
                     <div class="flex-grow-1">
                         <h3 class="mb-0"><a href="https://library.bc.edu" target="_blank">Boston College Libraries</a></h3>
@@ -185,6 +188,7 @@
                     </div>
                     <div class="flex-shrink-0"><span class="text-primary">March 2016 - May 2018</span></div>
                 </div>
+                </div>
             </div>
         </section>
 
@@ -242,12 +246,12 @@
                     <div>Migrated this entire portfolio of dashboards off third-party cloud services (Firebase, GitHub Pages) onto a self-hosted Unraid server running entirely on my home network. Runs PocketBase as a shared auth/database backend across all dashboards, Nginx Proxy Manager for reverse-proxying and automated SSL, AdGuard Home for network-wide DNS and local service resolution, and Docker containers for every service. Personal cloud services (Immich for photos, Nextcloud for files) are locked down to only be reachable over my home network or WireGuard VPN, with IP-based access rules enforced at the proxy layer. Also hosts Plex and a modded Minecraft server via Crafty Controller. Demonstrates Linux systems administration, Docker containerization, reverse-proxy and DNS configuration, and practical network security hardening.</div>
                 </div>
 
-                <h3 class="mb-3 project-group" id="projects-3d"><a href="https://drive.google.com/drive/folders/10Ybw_5lCwMTDknM1fhHTa_LDLwqcnXBe?usp=sharing" target="_blank">3D Design Projects</a></h3>
+                <h3 class="mb-3 project-group" id="projects-3d">3D Design Projects</h3>
         
                 <!-- Interactive 3D viewers (<model-viewer>, loaded in <head>); models are web-optimized GLBs in assets/models/ -->
                 <div class="design-project">
-                    <p class="mb-0"><strong><a href="https://drive.google.com/drive/folders/1Unm9Txd5npcubUXVfLV3TdT0wDfgqxta?usp=drive_link" target="_blank">Custom LEGO Bookends</a>:</strong></p>
-                    <div>Personalized commemorative display piece celebrating relationship milestones, featuring custom-built vignettes representing career achievements and shared interests. Design inspired by <a href="https://www.lego.com/en-us/product/glinda-elphaba-bookends-75691" target="_blank">LEGO's Wicked Glinda & Elphaba Bookends (75691)</a>.</div>
+                    <p class="mb-0"><strong>Custom LEGO Bookends:</strong></p>
+                    <div>Personalized commemorative display piece celebrating relationship milestones, featuring custom-built vignettes representing career achievements and shared interests. Design inspired by LEGO's Wicked Glinda & Elphaba Bookends (75691).</div>
                     <div class="row model-row">
                         <div class="col-md-6">
                             <figure class="model-card">
@@ -265,7 +269,7 @@
                 </div>
 
                 <div class="design-project">
-                    <p class="mb-0"><strong><a href="https://drive.google.com/drive/folders/1AAZDxrMBFJPbclH5igUpKBTtoY-VaHtf?usp=drive_link" target="_blank">Computer Cooling Solution</a>:</strong></p>
+                    <p class="mb-0"><strong>Computer Cooling Solution:</strong></p>
                     <div>Custom duct adapter designed to redirect computer exhaust airflow through ventilation ducting, improving thermal management and reducing ambient heat in the workspace.</div>
                     <div class="row model-row">
                         <div class="col-md-8 col-lg-6">
@@ -278,7 +282,7 @@
                 </div>
 
                 <div class="design-project">
-                    <p class="mb-0"><strong><a href="https://drive.google.com/drive/folders/1xS1L5u3OZ4w9FH6gtKl0Z2Rp5Yj3DCU2?usp=drive_link" target="_blank">Ventilation Panels</a>:</strong></p>
+                    <p class="mb-0"><strong>Ventilation Panels:</strong></p>
                     <div>Designed to expel volatile organic compounds (VOCs) from the 3D printer, directing harmful emissions outside the home through window-mounted ventilation.</div>
                     <div class="row model-row">
                         <div class="col-md-4">

@@ -10200,6 +10200,17 @@ section.resume-section .resume-section-content {
   transform: translateY(-1px);
   box-shadow: 0 4px 14px rgba(85, 194, 120, 0.35);
 }
+/* Experience "See Older" toggle reuses the pill style; its label flips when open */
+.older-toggle {
+  margin-top: 0;
+}
+.older-toggle.collapsed .when-open,
+.older-toggle:not(.collapsed) .when-closed {
+  display: none;
+}
+#older-experience {
+  padding-top: 1.75rem;
+}
 .dash-toggle + .collapse .mini-dash,
 .dash-toggle + .collapsing .mini-dash {
   margin-top: 0;
