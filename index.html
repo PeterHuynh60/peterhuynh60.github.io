@@ -195,12 +195,13 @@
                 
                 <h3 class="mb-3 project-group" id="projects-dashboards">Dashboards</h3>
 
-                <div class="mb-3">
+                <div class="dash-project">
                     <p class="mb-0"><strong><a href="https://bet.huynh.place" target="_blank">Binary Expected-Value Tool (B.E.T.)</a>:</strong></p>
                     <div>A comprehensive analytics dashboard for tracking and analyzing sports betting strategies across multiple sportsbooks. Implements probability theory and expected value calculations to monitor performance metrics including win rate, profit margins, and ROI across different betting types (matched betting, promotion harvesting, and positive EV strategies). Features real-time data visualization through Chart.js, a self-hosted PocketBase backend for data storage and auth, and bankroll management tools. Deployed as a Progressive Web App (PWA) with offline functionality for mobile access. Demonstrates proficiency in statistical analysis, risk management, financial modeling, and full-stack web development.</div>
 
-                    <!-- Compact B.E.T. widget (live data, see script below) -->
-                    <div class="mini-dash">
+                    <!-- Compact B.E.T. widget (live data, see script below), collapsed until opened -->
+                    <button class="btn btn-outline-primary btn-sm dash-toggle collapsed" type="button" data-toggle="collapse" data-target="#bet-dash" aria-expanded="false" aria-controls="bet-dash">Live dashboard <span class="dash-caret">▾</span></button>
+                    <div class="collapse" id="bet-dash"><div class="mini-dash">
                         <div class="row">
                             <div class="col-6 col-md-3"><div class="card border-success"><div class="card-body text-center"><h5 class="card-title text-muted">Total Earnings</h5><h2 class="text-success mb-0" id="summary-total-earnings">…</h2></div></div></div>
                             <div class="col-6 col-md-3"><div class="card border-primary"><div class="card-body text-center"><h5 class="card-title text-muted">Total Bets</h5><h2 class="text-primary mb-0" id="summary-total-bets">…</h2></div></div></div>
@@ -212,15 +213,16 @@
                             <canvas id="summary-chart" height="50"></canvas>
                         </div></div>
                         <a href="https://bet.huynh.place" target="_blank" class="btn btn-primary btn-sm">View Full Dashboard</a>
-                    </div>
+                    </div></div>
                 </div>
 
-                <div class="mb-3">
+                <div class="dash-project">
                     <p class="mb-0"><strong><a href="https://home.huynh.place" target="_blank">Home Search HQ</a>:</strong></p>
                     <div>A real-time property search dashboard built to streamline the Denver home-buying process — successfully used to find and buy our home. Features automated listing extraction via Claude AI with web search, Google Maps commute calculations to UCHealth Anschutz Campus, dual rating systems for both partners, dynamic mortgage parameter modeling, and interactive map visualization with status-colored pins. Supports passcode-protected edit mode, automated status ratings based on combined scores, and responsive design for mobile browsing. Built with React and a self-hosted PocketBase backend, with a small Node service handling the Claude and Google Maps API integrations. Self-hosted with a custom domain.</div>
 
-                    <!-- Compact Home Search HQ widget (live data, see script at the end of the page) -->
-                    <div class="mini-dash">
+                    <!-- Compact Home Search HQ widget (live data, see script at the end of the page), collapsed until opened -->
+                    <button class="btn btn-outline-primary btn-sm dash-toggle collapsed" type="button" data-toggle="collapse" data-target="#hshq-dash" aria-expanded="false" aria-controls="hshq-dash">Live dashboard <span class="dash-caret">▾</span></button>
+                    <div class="collapse" id="hshq-dash"><div class="mini-dash">
                         <div class="row">
                             <div class="col-6 col-md-3"><div class="card border-success"><div class="card-body text-center"><h5 class="card-title text-muted">Properties</h5><h2 class="text-success mb-0" id="hshq-total">…</h2></div></div></div>
                             <div class="col-6 col-md-3"><div class="card border-primary"><div class="card-body text-center"><h5 class="card-title text-muted">Active</h5><h2 class="text-primary mb-0" id="hshq-active">…</h2></div></div></div>
@@ -229,10 +231,8 @@
                         </div>
                         <div class="row" id="hshq-preview-row"></div>
                         <a href="https://home.huynh.place" target="_blank" class="btn btn-primary btn-sm">View Full Dashboard</a>
-                    </div>
+                    </div></div>
                 </div>
-
-                <div class="mb-5"></div>
 
                 <h3 class="mb-3 project-group" id="projects-server">Home Server &amp; Self-Hosted Infrastructure</h3>
 
@@ -488,6 +488,14 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-easing/1.4.1/jquery.easing.min.js"></script>
     <script src="js/scripts.js"></script>
+    <script>
+    // The B.E.T. chart may be drawn while its panel is still collapsed (zero size);
+    // resize it once the panel opens.
+    $("#bet-dash").on("shown.bs.collapse", function () {
+        var chart = window.Chart && Chart.getChart("summary-chart");
+        if (chart) chart.resize();
+    });
+    </script>
 
     <!-- Dark mode toggle -->
     <script>

@@ -10172,6 +10172,22 @@ section.resume-section .resume-section-content {
   scroll-margin-top: 1.5rem;
 }
 
+/* Dashboard projects get extra breathing room; each one's live widget is
+   collapsed behind a "Live dashboard" toggle under its description. */
+.dash-project {
+  margin-bottom: 3rem;
+}
+.dash-toggle {
+  margin-top: 0.75rem;
+}
+.dash-toggle .dash-caret {
+  display: inline-block;
+  transition: transform 0.2s ease;
+}
+.dash-toggle:not(.collapsed) .dash-caret {
+  transform: rotate(180deg);
+}
+
 /* Compact live dashboard widgets (B.E.T., Home Search HQ) shown under their
    project descriptions; the full dashboards are one click away. */
 .mini-dash {
