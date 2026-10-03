@@ -204,6 +204,8 @@
                 <div class="design-project">
                     <p class="mb-0"><strong>Custom LEGO Bookends:</strong></p>
                     <div>Personalized commemorative display piece celebrating relationship milestones, featuring custom-built vignettes representing career achievements and shared interests. Design inspired by LEGO's Wicked Glinda & Elphaba Bookends (75691).</div>
+                    <button class="btn btn-outline-primary btn-sm dash-toggle label-toggle" type="button" data-toggle="collapse" data-target="#model-bookends" aria-expanded="true" aria-controls="model-bookends"><span class="when-closed">Click to View</span><span class="when-open">Close</span> <span class="dash-caret">▾</span></button>
+                    <div class="collapse show" id="model-bookends">
                     <div class="row model-row">
                         <div class="col-md-6">
                             <figure class="model-card">
@@ -218,11 +220,14 @@
                             </figure>
                         </div>
                     </div>
+                    </div>
                 </div>
 
                 <div class="design-project">
                     <p class="mb-0"><strong>Computer Cooling Solution:</strong></p>
                     <div>Custom duct adapter designed to redirect computer exhaust airflow through ventilation ducting, improving thermal management and reducing ambient heat in the workspace.</div>
+                    <button class="btn btn-outline-primary btn-sm dash-toggle label-toggle collapsed" type="button" data-toggle="collapse" data-target="#model-cooling" aria-expanded="false" aria-controls="model-cooling"><span class="when-closed">Click to View</span><span class="when-open">Close</span> <span class="dash-caret">▾</span></button>
+                    <div class="collapse" id="model-cooling">
                     <div class="row model-row">
                         <div class="col-md-8 col-lg-6">
                             <figure class="model-card">
@@ -230,11 +235,14 @@
                             </figure>
                         </div>
                     </div>
+                    </div>
                 </div>
 
                 <div class="design-project">
                     <p class="mb-0"><strong>Ventilation Panels:</strong></p>
                     <div>Designed to expel volatile organic compounds (VOCs) from the 3D printer, directing harmful emissions outside the home through window-mounted ventilation.</div>
+                    <button class="btn btn-outline-primary btn-sm dash-toggle label-toggle collapsed" type="button" data-toggle="collapse" data-target="#model-panels" aria-expanded="false" aria-controls="model-panels"><span class="when-closed">Click to View</span><span class="when-open">Close</span> <span class="dash-caret">▾</span></button>
+                    <div class="collapse" id="model-panels">
                     <div class="row model-row">
                         <div class="col-md-4">
                             <figure class="model-card">
@@ -254,6 +262,7 @@
                                 <figcaption>Exhaust port base</figcaption>
                             </figure>
                         </div>
+                    </div>
                     </div>
                 </div>
         
@@ -303,6 +312,64 @@
                 <div class="mb-5">
                     <p class="mb-0"><strong>Unraid Home Server:</strong></p>
                     <div>Migrated this entire portfolio of dashboards off third-party cloud services (Firebase, GitHub Pages) onto a self-hosted Unraid server running entirely on my home network. Runs PocketBase as a shared auth/database backend across all dashboards, Nginx Proxy Manager for reverse-proxying and automated SSL, AdGuard Home for network-wide DNS and local service resolution, and Docker containers for every service. Personal cloud services (Immich for photos, Nextcloud for files) are locked down to only be reachable over my home network or WireGuard VPN, with IP-based access rules enforced at the proxy layer. Also hosts Plex and a modded Minecraft server via Crafty Controller. Demonstrates Linux systems administration, Docker containerization, reverse-proxy and DNS configuration, and practical network security hardening.</div>
+
+                    <!-- Diagram + case studies are collapsed behind "More details" -->
+                    <button class="btn btn-outline-primary btn-sm dash-toggle label-toggle collapsed" type="button" data-toggle="collapse" data-target="#server-details" aria-expanded="false" aria-controls="server-details"><span class="when-closed">More details</span><span class="when-open">Fewer details</span> <span class="dash-caret">▾</span></button>
+                    <div class="collapse" id="server-details">
+                    <!-- Architecture overview: plain HTML boxes so it reflows on phones and follows dark mode -->
+                    <div class="arch" role="img" aria-label="Architecture: internet visitors reach public apps through Nginx Proxy Manager over HTTPS; private apps are only reachable from the home network or WireGuard VPN; everything runs as Docker containers on an Unraid server.">
+                        <div class="arch-frame">
+                            <div class="arch-frame-label">Unraid server &middot; every service in its own Docker container</div>
+                            <div class="arch-row">
+                                <div class="arch-node arch-source"><strong>Visitors</strong><span>Public internet</span></div>
+                                <div class="arch-arrow" aria-hidden="true"></div>
+                                <div class="arch-node arch-gate"><strong>Nginx Proxy Manager</strong><span>HTTPS &middot; Let's Encrypt certificates</span></div>
+                                <div class="arch-arrow" aria-hidden="true"></div>
+                                <div class="arch-group arch-public">
+                                    <div class="arch-group-label">Public apps</div>
+                                    <div class="arch-chips"><span>This website</span><span>B.E.T.</span><span>Home Search HQ</span><span>Home Search API (Node)</span><span>PocketBase: shared auth + data</span></div>
+                                </div>
+                            </div>
+                            <div class="arch-row">
+                                <div class="arch-node arch-source"><strong>Our devices</strong><span>Home network or WireGuard VPN</span></div>
+                                <div class="arch-arrow" aria-hidden="true"></div>
+                                <div class="arch-node arch-gate"><strong>AdGuard Home + proxy access rules</strong><span>Local DNS &middot; home/VPN-only access</span></div>
+                                <div class="arch-arrow" aria-hidden="true"></div>
+                                <div class="arch-group arch-private">
+                                    <div class="arch-group-label">Private apps</div>
+                                    <div class="arch-chips"><span>Immich (photos)</span><span>Nextcloud (files)</span><span>Crafty Controller</span></div>
+                                </div>
+                            </div>
+                            <div class="arch-footer">Also running: Plex media server &middot; modded Minecraft servers</div>
+                        </div>
+                    </div>
+
+                    <!-- Case studies -->
+                    <div class="case-studies">
+                        <div class="case-study">
+                            <div class="case-head"><span class="case-icon" aria-hidden="true">☁️</span><h4>Leaving Firebase for a self-hosted stack</h4></div>
+                            <div class="case-stat">3 dashboards moved onto hardware I own</div>
+                            <div class="case-label">The problem</div>
+                            <p>The dashboards depended on Firebase (Firestore, Auth, Cloud Functions) and GitHub Pages, tying them to third-party services, quotas and pricing.</p>
+                            <div class="case-label">What I did</div>
+                            <p>Stood up PocketBase as one shared auth and database backend, with migration scripts that moved the data and rebuilt the schema with per-collection access rules. Replaced Cloud Functions with a small Node service that calls the Claude and Google Maps APIs behind PocketBase login, so API keys never reach the browser, and moved the sites into Nginx containers with automatic HTTPS.</p>
+                            <div class="case-label">Result</div>
+                            <p>One login system and full control over data, backups and access.</p>
+                            <div class="case-tags"><span>PocketBase</span><span>Node.js</span><span>Docker</span><span>Nginx</span><span>Data migration</span></div>
+                        </div>
+                        <div class="case-study">
+                            <div class="case-head"><span class="case-icon" aria-hidden="true">⛏️</span><h4>Taming a 200+ mod Minecraft server</h4></div>
+                            <div class="case-stat">213 mods, one stable server</div>
+                            <div class="case-label">The problem</div>
+                            <p>Friends wanted a heavily modded Create: Aeronautics pack. Out of the box it wouldn't start: the container shipped the wrong Java version, files had the wrong owner, and the world crashed on startup.</p>
+                            <div class="case-label">What I did</div>
+                            <p>Installed Java 21 inside the container and pointed the server at it, fixed file ownership for the container's user, and moved the server off a port that was already taken. Then traced crashes to performance mods (Moonrise, C2ME, Radium) conflicting with Create and the claims mod and removed them, including one a case-sensitive filename let slip past the first cleanup. Memory is tuned in Crafty's launch command, the one setting that actually applies.</p>
+                            <div class="case-label">Result</div>
+                            <p>A stable, whitelisted server friends can join anytime, managed from a web panel.</p>
+                            <div class="case-tags"><span>Linux</span><span>Docker</span><span>Java</span><span>Troubleshooting</span></div>
+                        </div>
+                    </div>
+                    </div>
                 </div>
 
                 <h3 class="mb-3 project-group" id="projects-recipes"><a href="https://www.notion.so/07a5b9015c5948c498700ccae752bf61?v=bf86ec5c0963447a83af442bfb4e1adc&source=copy_link" target="_blank">Experimental Recipes</a></h3>
