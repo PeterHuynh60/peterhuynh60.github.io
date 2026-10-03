@@ -10134,19 +10134,79 @@ section.resume-section .resume-section-content {
   }
 }
 
-/* Dashboard summary sections (B.E.T., Home Search HQ) are compact widgets,
-   not full-page resume sections — they don't need the 100vh full-page feel,
-   and stacking two of them back-to-back with that spacing left a lot of
-   dead space between them. */
-section.resume-section.dashboard-section-compact {
-  padding-top: 2rem;
-  padding-bottom: 2rem;
-  min-height: 0;
+/* Projects submenu in the sidebar: collapsed until scrollspy marks the
+   Projects link active (i.e. while scrolling through Projects), then it
+   slides open, indented under it, highlighting the current project group. */
+#sideNav .project-subnav {
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  flex-wrap: nowrap;
+  margin-left: 1rem;
+  border-left: 2px solid rgba(255, 255, 255, 0.3);
+  text-align: left;
+  transition: max-height 0.35s ease, opacity 0.35s ease, margin 0.35s ease;
 }
-@media (min-width: 768px) {
-  section.resume-section.dashboard-section-compact {
-    min-height: 0;
+#sideNav .nav-link.active + .project-subnav {
+  max-height: 16rem;
+  opacity: 1;
+  margin-top: 0.1rem;
+  margin-bottom: 0.4rem;
+}
+#sideNav .navbar-nav .project-subnav .nav-item .nav-link {
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.02rem;
+  text-transform: none;
+  padding: 0.2rem 0.75rem;
+}
+@media (min-width: 992px) {
+  #sideNav .project-subnav {
+    margin-left: 5.25rem;
   }
+}
+
+/* Project groups are scroll targets for the submenu; keep their headings
+   clear of the top edge when jumped to. */
+.project-group {
+  scroll-margin-top: 1.5rem;
+}
+
+/* Compact live dashboard widgets (B.E.T., Home Search HQ) shown under their
+   project descriptions; the full dashboards are one click away. */
+.mini-dash {
+  margin-top: 0.75rem;
+  padding: 0.75rem 0.75rem 0.25rem;
+  border: 1px solid #dee2e6;
+  border-radius: 0.5rem;
+}
+.mini-dash .row {
+  margin-left: -0.35rem;
+  margin-right: -0.35rem;
+}
+.mini-dash .row > div {
+  padding-left: 0.35rem;
+  padding-right: 0.35rem;
+  margin-bottom: 0.7rem;
+}
+.mini-dash .card-body {
+  padding: 0.5rem 0.6rem;
+}
+.mini-dash .card-title {
+  font-size: 0.8rem;
+  margin-bottom: 0.15rem;
+}
+.mini-dash h2 {
+  font-size: 1.5rem;
+}
+.mini-dash > .card {
+  margin-bottom: 0.7rem;
+}
+.mini-dash > .btn {
+  margin-bottom: 0.5rem;
+}
+[data-theme="dark"] .mini-dash {
+  border-color: #2a2d33;
 }
 
 /* ===================================================================
@@ -10237,7 +10297,7 @@ section.resume-section.dashboard-section-compact {
   color: #9a9fa8 !important;
 }
 
-/* Blog post collapse sections */
+/* Collapsible content (e.g. the mobile nav menu) */
 [data-theme="dark"] .collapse {
   color: #d8dade;
 }
