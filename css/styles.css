@@ -10496,13 +10496,15 @@ section.resume-section .resume-section-content {
 }
 .rp-rating {
   position: absolute;
-  top: 0.5rem;
-  right: 0.5rem;
-  padding: 0.1rem 0.5rem;
-  border-radius: 0.45rem;
+  top: 0.6rem;
+  right: 0.6rem;
+  padding: 0.25rem 0.7rem;
+  border-radius: 0.6rem;
   font-weight: 800;
-  font-size: 0.8rem;
+  font-size: 1.15rem;
+  line-height: 1.2;
   color: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
 }
 .rp-great { background: #2f9e5a; }
 .rp-good  { background: #3b82c4; }

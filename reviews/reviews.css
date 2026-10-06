@@ -264,9 +264,10 @@ html body {
 .rv-rating {
   flex: 0 0 auto;
   font-weight: 800;
-  font-size: 0.85rem;
-  padding: 0.1rem 0.55rem;
-  border-radius: 0.5rem;
+  font-size: 1.15rem;
+  line-height: 1.2;
+  padding: 0.25rem 0.7rem;
+  border-radius: 0.6rem;
   color: #fff;
 }
 .rv-rating-great { background: #2f9e5a; }
