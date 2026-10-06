@@ -57,7 +57,7 @@
     if (hasPurify) DOMPurify.addHook("afterSanitizeAttributes", function (node) {
         if (node.hasAttribute("class")) {
             // ql-indent-N = indentation level; ql-ui = Quill's list bullet/number marker.
-            var keep = node.getAttribute("class").split(/\s+/).filter(function (c) { return /^(ql-indent-[1-8]|ql-ui)$/.test(c); });
+            var keep = node.getAttribute("class").split(/\s+/).filter(function (c) { return /^(ql-indent-[1-8]|ql-ui|ql-firstline-1)$/.test(c); });
             if (keep.length) node.setAttribute("class", keep.join(" ")); else node.removeAttribute("class");
         }
         if (node.tagName === "A") { node.setAttribute("target", "_blank"); node.setAttribute("rel", "noopener noreferrer nofollow"); }
@@ -66,25 +66,68 @@
     function sanitize(html) { return hasPurify ? DOMPurify.sanitize(html || "", SAFE) : ""; }
 
     var quill = null;
+    // First-line indent (like a book paragraph): a block-level class, ql-firstline-1, styled with text-indent.
+    function registerFirstLine() {
+        var Parchment = Quill.import("parchment");
+        Quill.register(new Parchment.ClassAttributor("firstline", "ql-firstline", { scope: Parchment.Scope.BLOCK, whitelist: ["1"] }), true);
+        Quill.import("ui/icons").firstline =
+            '<svg viewBox="0 0 18 18"><line class="ql-stroke" x1="8" x2="15" y1="4" y2="4"></line>' +
+            '<line class="ql-stroke" x1="3" x2="15" y1="9" y2="9"></line><line class="ql-stroke" x1="3" x2="15" y1="14" y2="14"></line>' +
+            '<polyline class="ql-stroke" points="3 2.5 5.5 4 3 5.5"></polyline></svg>';
+    }
+
     function getEditor() {
         if (quill) return quill;
+        registerFirstLine();
         quill = new Quill("#rv-review-editor", {
             theme: "snow",
             placeholder: "What did you think?",
             modules: {
-                toolbar: [
-                    [{ header: [2, 3, false] }],
-                    ["bold", "italic", "underline", "strike"],
-                    [{ list: "ordered" }, { list: "bullet" }],
-                    [{ indent: "-1" }, { indent: "+1" }],
-                    ["blockquote", "link"],
-                    ["clean"]
-                ],
+                toolbar: {
+                    container: [
+                        [{ header: [2, 3, false] }],
+                        ["bold", "italic", "underline", "strike"],
+                        [{ list: "ordered" }, { list: "bullet" }],
+                        ["firstline", { indent: "-1" }, { indent: "+1" }],
+                        ["blockquote", "link"],
+                        ["clean"]
+                    ],
+                    handlers: {
+                        firstline: function () {
+                            var on = this.quill.getFormat().firstline;
+                            this.quill.format("firstline", on ? false : "1", "user");
+                        }
+                    }
+                },
                 keyboard: {
                     bindings: {
-                        // Tab / Shift+Tab indent and outdent the paragraph (instead of inserting a tab character).
-                        tab: { key: "Tab", handler: function () { this.quill.format("indent", "+1", "user"); return false; } },
-                        outdentAnywhere: { key: "Tab", shiftKey: true, handler: function () { this.quill.format("indent", "-1", "user"); return false; } }
+                        // In lists (and already-indented blocks) Quill's built-in Tab binding nests/indents first.
+                        // Otherwise: Tab at the start of a paragraph indents its first line; pressing it again
+                        // there indents the whole paragraph; Tab mid-text inserts a tab character.
+                        tab: {
+                            key: "Tab",
+                            handler: function (range, context) {
+                                if (context.offset === 0 && range.length === 0) {
+                                    if (!context.format.firstline) this.quill.formatLine(range.index, 1, "firstline", "1", "user");
+                                    else this.quill.format("indent", "+1", "user");
+                                    return false;
+                                }
+                                this.quill.deleteText(range.index, range.length, "user");
+                                this.quill.insertText(range.index, "\t", "user");
+                                this.quill.setSelection(range.index + 1, 0, "silent");
+                                return false;
+                            }
+                        },
+                        // Shift+Tab: remove the first-line indent if there is one, otherwise outdent.
+                        outdentAnywhere: {
+                            key: "Tab",
+                            shiftKey: true,
+                            handler: function (range, context) {
+                                if (context.format.firstline) this.quill.formatLine(range.index, 1, "firstline", false, "user");
+                                else this.quill.format("indent", "-1", "user");
+                                return false;
+                            }
+                        }
                     }
                 }
             }

@@ -333,6 +333,11 @@ html body {
   mask-image: linear-gradient(to bottom, #000 60%, transparent);
 }
 
+/* First-line paragraph indent (editor and published reviews) */
+.ql-editor .ql-firstline-1 {
+  text-indent: 2em;
+}
+
 /* Editor (Quill "snow" theme) in the add/edit dialog */
 .rv-field {
   margin-bottom: 0.7rem;
