@@ -1,0 +1,22 @@
+{
+  "name": "video_reviews",
+  "type": "base",
+  "listRule": "",
+  "viewRule": "",
+  "createRule": "@request.auth.email = \"peter@huynh.place\" && @request.body.user = @request.auth.id",
+  "updateRule": "user = @request.auth.id && @request.auth.email = \"peter@huynh.place\"",
+  "deleteRule": "user = @request.auth.id && @request.auth.email = \"peter@huynh.place\"",
+  "fields": [
+    { "name": "user", "type": "relation", "required": true, "collectionId": "_pb_users_auth_", "maxSelect": 1, "cascadeDelete": false },
+    { "name": "videoId", "type": "text", "required": true, "pattern": "^[A-Za-z0-9_-]{11}$" },
+    { "name": "title", "type": "text", "required": true, "max": 300 },
+    { "name": "channel", "type": "text", "max": 200 },
+    { "name": "rating", "type": "number", "required": true, "min": 0, "max": 10 },
+    { "name": "review", "type": "text", "max": 20000 },
+    { "name": "tags", "type": "json", "maxSize": 2000 },
+    { "name": "watchedOn", "type": "date" },
+    { "name": "created", "type": "autodate", "onCreate": true, "onUpdate": false },
+    { "name": "updated", "type": "autodate", "onCreate": true, "onUpdate": true }
+  ],
+  "indexes": ["CREATE INDEX idx_video_reviews_created ON video_reviews (created)"]
+}

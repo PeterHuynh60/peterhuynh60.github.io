@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <meta name="description" content="Peter Huynh's reviews of YouTube videos" />
+    <meta name="author" content="Peter Huynh" />
+    <title>Video Reviews | Peter Huynh</title>
+    <link rel="icon" type="image/x-icon" href="../assets/img/favicon.ico" />
+    <link href="https://fonts.googleapis.com/css?family=Saira+Extra+Condensed:500,700" rel="stylesheet" type="text/css" />
+    <link href="https://fonts.googleapis.com/css?family=Muli:400,400i,800,800i" rel="stylesheet" type="text/css" />
+    <link href="../css/styles.css" rel="stylesheet" />
+    <link href="reviews.css" rel="stylesheet" />
+    <!-- PocketBase SDK: reviews live in the self-hosted PocketBase (public read, owner-only write) -->
+    <script src="https://cdn.jsdelivr.net/npm/pocketbase@0.25.1/dist/pocketbase.umd.js"></script>
+    <script>
+      // Same theme preference as the main site (same origin, same localStorage key).
+      (function () {
+        try {
+          var saved = localStorage.getItem("theme");
+          var wantsDark = saved ? saved === "dark" : window.matchMedia("(prefers-color-scheme: dark)").matches;
+          if (wantsDark) document.documentElement.setAttribute("data-theme", "dark");
+        } catch (e) {}
+      })();
+    </script>
+</head>
+<body>
+    <header class="rv-header">
+        <div class="rv-wrap rv-header-inner">
+            <a class="rv-back" href="/">&larr; huynh.place</a>
+            <div class="rv-header-actions">
+                <button id="rv-new" class="rv-btn rv-btn-primary" type="button" hidden>+ New review</button>
+                <button id="rv-auth" class="rv-btn" type="button">Log in</button>
+                <button id="theme-toggle" class="theme-toggle-btn" type="button" aria-label="Toggle dark mode" title="Toggle dark mode">
+                    <span class="theme-toggle-icon-light">🌙</span>
+                    <span class="theme-toggle-icon-dark">☀️</span>
+                </button>
+            </div>
+        </div>
+        <div class="rv-wrap">
+            <h1 class="rv-title">Video Reviews</h1>
+            <p class="rv-subtitle">YouTube videos I've watched, rated and written up.</p>
+        </div>
+    </header>
+
+    <main class="rv-wrap">
+        <div class="rv-toolbar">
+            <input id="rv-search" class="rv-input" type="search" placeholder="Search titles, channels, reviews…" aria-label="Search reviews" />
+            <select id="rv-sort" class="rv-input rv-select" aria-label="Sort reviews">
+                <option value="newest">Newest first</option>
+                <option value="rating">Highest rated</option>
+                <option value="oldest">Oldest first</option>
+            </select>
+        </div>
+        <div id="rv-tags" class="rv-tag-filter" aria-label="Filter by tag"></div>
+        <p id="rv-status" class="rv-status">Loading reviews…</p>
+        <div id="rv-grid" class="rv-grid"></div>
+    </main>
+
+    <!-- Log in -->
+    <dialog id="rv-login" class="rv-dialog">
+        <form id="rv-login-form" method="dialog">
+            <h2>Log in</h2>
+            <label>Email<input id="rv-login-email" class="rv-input" type="email" autocomplete="username" value="peter@huynh.place" required /></label>
+            <label>Password<input id="rv-login-password" class="rv-input" type="password" autocomplete="current-password" required /></label>
+            <p id="rv-login-error" class="rv-error" hidden></p>
+            <div class="rv-dialog-actions">
+                <button class="rv-btn" type="button" data-close>Cancel</button>
+                <button class="rv-btn rv-btn-primary" type="submit">Log in</button>
+            </div>
+        </form>
+    </dialog>
+
+    <!-- Add / edit review -->
+    <dialog id="rv-editor" class="rv-dialog rv-dialog-wide">
+        <form id="rv-form" method="dialog">
+            <h2 id="rv-form-title">New review</h2>
+            <label>YouTube link<input id="rv-url" class="rv-input" type="url" placeholder="https://www.youtube.com/watch?v=…" required /></label>
+            <div id="rv-preview" class="rv-preview" hidden>
+                <img id="rv-preview-img" alt="" />
+                <div><strong id="rv-preview-title"></strong><span id="rv-preview-channel"></span></div>
+            </div>
+            <div class="rv-form-row">
+                <label>Title<input id="rv-title" class="rv-input" type="text" maxlength="300" required /></label>
+                <label>Channel<input id="rv-channel" class="rv-input" type="text" maxlength="200" /></label>
+            </div>
+            <div class="rv-form-row">
+                <label>Rating (0–10)<input id="rv-rating" class="rv-input" type="number" min="0" max="10" step="0.5" required /></label>
+                <label>Watched on<input id="rv-watched" class="rv-input" type="date" /></label>
+            </div>
+            <label>Tags <small>(comma separated)</small><input id="rv-tags-input" class="rv-input" type="text" placeholder="tech, cooking, documentary" /></label>
+            <label>Review<textarea id="rv-review" class="rv-input" rows="7" maxlength="20000" placeholder="What did you think?"></textarea></label>
+            <p id="rv-form-error" class="rv-error" hidden></p>
+            <div class="rv-dialog-actions">
+                <button id="rv-delete" class="rv-btn rv-btn-danger" type="button" hidden>Delete</button>
+                <span class="rv-spacer"></span>
+                <button class="rv-btn" type="button" data-close>Cancel</button>
+                <button class="rv-btn rv-btn-primary" type="submit">Save</button>
+            </div>
+        </form>
+    </dialog>
+
+    <script src="reviews.js"></script>
+</body>
+</html>
