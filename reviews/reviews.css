@@ -334,6 +334,69 @@ html body {
   mask-image: linear-gradient(to bottom, #000 60%, transparent);
 }
 
+/* Inline spoilers: blacked out on the page until clicked; dashed underline in the editor so you can see them */
+.rv-rich .ql-spoiler {
+  background: var(--rv-text);
+  color: transparent;
+  border-radius: 0.25rem;
+  padding: 0 0.15rem;
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+.rv-rich .ql-spoiler a {
+  color: transparent;
+  pointer-events: none;
+}
+.rv-rich .ql-spoiler.rv-revealed {
+  background: var(--rv-chip);
+  color: inherit;
+  user-select: text;
+}
+.rv-rich .ql-spoiler.rv-revealed a {
+  color: var(--rv-accent-dark);
+  pointer-events: auto;
+}
+.rv-rich .ql-spoiler:focus-visible {
+  outline: 3px solid var(--rv-accent);
+  outline-offset: 1px;
+}
+.rv-rich-editor .ql-spoiler {
+  background: var(--rv-chip);
+  color: inherit;
+  padding: 0;
+  border-bottom: 2px dashed #c98516;
+}
+
+/* Whole-review spoiler cover */
+.rv-spoiler-hidden > :not(.rv-spoiler-cover) {
+  display: none !important;
+}
+.rv-spoiler-cover {
+  width: 100%;
+  padding: 0.8rem 0.9rem;
+  border: 2px dashed #c98516;
+  border-radius: 0.6rem;
+  background: rgba(242, 169, 59, 0.12);
+  color: var(--rv-text);
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+.rv-spoiler-cover:hover {
+  background: rgba(242, 169, 59, 0.22);
+}
+.rv-check {
+  display: flex !important;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 700;
+}
+.rv-check small {
+  font-weight: 400;
+  color: var(--rv-muted);
+}
+
 /* First-line paragraph indent (editor and published reviews) */
 .ql-editor .ql-firstline-1 {
   text-indent: 2em;

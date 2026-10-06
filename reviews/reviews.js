@@ -49,15 +49,16 @@
     // Only the formatting the editor produces survives; scripts, styles, images, event handlers
     // and non-http(s) links are stripped. Indent classes are the only classes kept.
     var SAFE = {
-        ALLOWED_TAGS: ["p", "br", "strong", "em", "u", "s", "h2", "h3", "ol", "ul", "li", "blockquote", "a", "span"],
+        ALLOWED_TAGS: ["p", "br", "strong", "em", "u", "s", "h2", "h3", "ol", "ul", "li", "blockquote", "a", "span", "mark"],
         ALLOWED_ATTR: ["href", "class", "data-list"],
         ALLOWED_URI_REGEXP: /^https?:\/\//i
     };
     var hasPurify = typeof window.DOMPurify !== "undefined";
     if (hasPurify) DOMPurify.addHook("afterSanitizeAttributes", function (node) {
         if (node.hasAttribute("class")) {
-            // ql-indent-N = indentation level; ql-ui = Quill's list bullet/number marker.
-            var keep = node.getAttribute("class").split(/\s+/).filter(function (c) { return /^(ql-indent-[1-8]|ql-ui|ql-firstline-1)$/.test(c); });
+            // ql-indent-N = indentation level; ql-ui = Quill's list bullet/number marker;
+            // ql-firstline-1 = first-line indent; ql-spoiler = hidden-until-clicked text.
+            var keep = node.getAttribute("class").split(/\s+/).filter(function (c) { return /^(ql-indent-[1-8]|ql-ui|ql-firstline-1|ql-spoiler)$/.test(c); });
             if (keep.length) node.setAttribute("class", keep.join(" ")); else node.removeAttribute("class");
         }
         if (node.tagName === "A") { node.setAttribute("target", "_blank"); node.setAttribute("rel", "noopener noreferrer nofollow"); }
@@ -66,19 +67,58 @@
     function sanitize(html) { return hasPurify ? DOMPurify.sanitize(html || "", SAFE) : ""; }
 
     var quill = null;
-    // First-line indent (like a book paragraph): a block-level class, ql-firstline-1, styled with text-indent.
-    function registerFirstLine() {
+    function registerFormats() {
         var Parchment = Quill.import("parchment");
+        var icons = Quill.import("ui/icons");
+
+        // First-line indent (like a book paragraph): a block-level class, ql-firstline-1, styled with text-indent.
         Quill.register(new Parchment.ClassAttributor("firstline", "ql-firstline", { scope: Parchment.Scope.BLOCK, whitelist: ["1"] }), true);
-        Quill.import("ui/icons").firstline =
+        icons.firstline =
             '<svg viewBox="0 0 18 18"><line class="ql-stroke" x1="8" x2="15" y1="4" y2="4"></line>' +
             '<line class="ql-stroke" x1="3" x2="15" y1="9" y2="9"></line><line class="ql-stroke" x1="3" x2="15" y1="14" y2="14"></line>' +
             '<polyline class="ql-stroke" points="3 2.5 5.5 4 3 5.5"></polyline></svg>';
+
+        // Inline spoiler: <mark class="ql-spoiler">, blacked out on the page until clicked.
+        // (Not <span>: Quill's base inline blot is a span, so a span format would be optimized away.)
+        var Inline = Quill.import("blots/inline");
+        class Spoiler extends Inline {}
+        Spoiler.blotName = "spoiler";
+        Spoiler.tagName = "MARK";
+        Spoiler.className = "ql-spoiler";
+        Quill.register(Spoiler, true);
+        icons.spoiler =
+            '<svg viewBox="0 0 18 18"><path class="ql-stroke" d="M2 9s2.5-4.5 7-4.5S16 9 16 9s-2.5 4.5-7 4.5S2 9 2 9z"></path>' +
+            '<circle class="ql-stroke" cx="9" cy="9" r="2"></circle><line class="ql-stroke" x1="3" x2="15" y1="15" y2="3"></line></svg>';
+
+        // Links typed without a protocol (www.example.com) become https:// instead of being dropped.
+        var Link = Quill.import("formats/link");
+        class SafeLink extends Link {
+            static sanitize(url) {
+                var u = String(url || "").trim();
+                if (u && !/^[a-z][a-z0-9+.-]*:/i.test(u)) u = "https://" + u.replace(/^\/+/, "");
+                return super.sanitize(u);
+            }
+        }
+        Quill.register(SafeLink, true);
+    }
+
+    function normalizeUrl(u) {
+        u = (u || "").trim();
+        if (!u || u === "https://") return "";
+        return /^https?:\/\//i.test(u) ? u : "https://" + u.replace(/^\/+/, "");
+    }
+
+    // Plain-text copy for search and the main-page preview, with spoiler text masked out.
+    function plainTextMasked(q) {
+        return q.getContents().ops.map(function (op) {
+            if (typeof op.insert !== "string") return "";
+            return op.attributes && op.attributes.spoiler ? "[spoiler]" : op.insert;
+        }).join("").replace(/\[spoiler\](\s*\[spoiler\])+/g, "[spoiler]").trim();
     }
 
     function getEditor() {
         if (quill) return quill;
-        registerFirstLine();
+        registerFormats();
         quill = new Quill("#rv-review-editor", {
             theme: "snow",
             placeholder: "What did you think?",
@@ -89,13 +129,29 @@
                         ["bold", "italic", "underline", "strike"],
                         [{ list: "ordered" }, { list: "bullet" }],
                         ["firstline", { indent: "-1" }, { indent: "+1" }],
-                        ["blockquote", "link"],
+                        ["blockquote", "link", "spoiler"],
                         ["clean"]
                     ],
                     handlers: {
                         firstline: function () {
                             var on = this.quill.getFormat().firstline;
                             this.quill.format("firstline", on ? false : "1", "user");
+                        },
+                        spoiler: function () {
+                            var range = this.quill.getSelection();
+                            if (!range || !range.length) { window.alert("Select the text you want to hide as a spoiler first."); return; }
+                            this.quill.format("spoiler", !this.quill.getFormat(range).spoiler, "user");
+                        },
+                        // Simple prompt instead of Quill's inline link box (whose Enter key submitted the whole review form).
+                        link: function () {
+                            var range = this.quill.getSelection();
+                            if (!range || !range.length) { window.alert("Select the text you want to turn into a link first."); return; }
+                            var current = this.quill.getFormat(range).link || "https://";
+                            var answer = window.prompt("Link address (leave empty to remove the link):", current);
+                            if (answer === null) return;
+                            var url = normalizeUrl(answer);
+                            this.quill.setSelection(range, "silent");
+                            this.quill.format("link", url || false, "user");
                         }
                     }
                 },
@@ -133,6 +189,24 @@
             }
         });
         return quill;
+    }
+
+    // Inline spoilers: blacked out until clicked (or focused + Enter/Space); clicking again re-hides.
+    function activateInlineSpoilers(container) {
+        container.querySelectorAll(".ql-spoiler").forEach(function (s) {
+            s.tabIndex = 0;
+            s.setAttribute("role", "button");
+            s.setAttribute("aria-pressed", "false");
+            s.title = "Spoiler — click to reveal";
+            var toggle = function (e) {
+                e.preventDefault();
+                var shown = s.classList.toggle("rv-revealed");
+                s.setAttribute("aria-pressed", shown ? "true" : "false");
+                s.title = shown ? "Click to hide again" : "Spoiler — click to reveal";
+            };
+            s.addEventListener("click", toggle);
+            s.addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") toggle(e); });
+        });
     }
 
     function thumbUrl(id) { return "https://i.ytimg.com/vi/" + id + "/hqdefault.jpg"; }
@@ -225,16 +299,27 @@
         if (meta) body.appendChild(el("div", "rv-meta", meta));
 
         if (r.review || r.reviewHtml) {
+            // Whole-review spoiler flag: the write-up sits behind a click-to-reveal cover.
+            var holder = body;
+            if (r.spoiler) {
+                holder = el("div", "rv-spoiler-wrap rv-spoiler-hidden");
+                var cover = el("button", "rv-spoiler-cover", "⚠ This review contains spoilers — click to reveal");
+                cover.type = "button";
+                cover.addEventListener("click", function () { holder.classList.remove("rv-spoiler-hidden"); cover.remove(); });
+                holder.appendChild(cover);
+                body.appendChild(holder);
+            }
             var text;
             if (r.reviewHtml && hasPurify) {
                 // Formatted review: sanitized HTML inside Quill's own styling (lists, indents, quotes).
                 text = el("div", "ql-editor rv-rich");
                 text.innerHTML = sanitize(r.reviewHtml);
+                activateInlineSpoilers(text);
             } else {
                 // Plain-text review, or the sanitizer failed to load: show the plain copy (never raw HTML).
                 text = el("p", "rv-text", r.review || "");
             }
-            body.appendChild(text);
+            holder.appendChild(text);
             var plain = r.review || text.textContent;
             if (plain.length > 320 || plain.split("\n").length > 5) {
                 text.classList.add("rv-clamped");
@@ -244,7 +329,7 @@
                     var open = text.classList.toggle("rv-clamped");
                     more.textContent = open ? "Read more" : "Show less";
                 });
-                body.appendChild(more);
+                holder.appendChild(more);
             }
         }
 
@@ -373,6 +458,7 @@
         $("rv-rating").value = r ? r.rating : "";
         $("rv-watched").value = r && r.watchedOn ? r.watchedOn.slice(0, 10) : new Date().toISOString().slice(0, 10);
         $("rv-tags-input").value = r ? tagsOf(r).join(", ") : "";
+        $("rv-spoiler").checked = !!(r && r.spoiler);
         var editor = getEditor();
         editor.setContents([], "silent");
         if (r && r.reviewHtml && hasPurify) editor.clipboard.dangerouslyPasteHTML(sanitize(r.reviewHtml), "silent");
@@ -387,6 +473,11 @@
 
     $("rv-new").addEventListener("click", function () { openEditor(null); });
 
+    // Enter inside Quill's own link box (shown when clicking an existing link) must not submit the review form.
+    $("rv-form").addEventListener("keydown", function (e) {
+        if (e.key === "Enter" && e.target.closest && e.target.closest(".ql-tooltip")) e.preventDefault();
+    });
+
     $("rv-form").addEventListener("submit", function (e) {
         e.preventDefault();
         var err = $("rv-form-error");
@@ -400,8 +491,10 @@
             channel: $("rv-channel").value.trim(),
             rating: parseFloat($("rv-rating").value),
             // Plain-text copy powers search and the main site's preview snippets; the HTML keeps the formatting.
-            review: getEditor().getText().trim().slice(0, 20000),
+            // (spoiler text is masked as "[spoiler]" in the plain copy so it can't leak there).
+            review: plainTextMasked(getEditor()).slice(0, 20000),
             reviewHtml: getEditor().getText().trim() ? sanitize(getEditor().root.innerHTML) : "",
+            spoiler: $("rv-spoiler").checked,
             tags: $("rv-tags-input").value.split(",").map(function (t) { return t.trim().toLowerCase(); })
                 .filter(function (t, i, a) { return t && a.indexOf(t) === i; }).slice(0, 12),
             watchedOn: $("rv-watched").value ? $("rv-watched").value + " 12:00:00.000Z" : ""

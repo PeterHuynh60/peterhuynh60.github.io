@@ -10531,6 +10531,13 @@ section.resume-section .resume-section-content {
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
+.rp-spoiler-note {
+  font-weight: 700;
+  color: #c98516;
+}
+[data-theme="dark"] #reviews-preview .rp-card p.rp-spoiler-note {
+  color: #f2b45a;
+}
 .reviews-all {
   margin-top: 0;
 }

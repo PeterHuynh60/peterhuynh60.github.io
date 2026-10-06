@@ -662,7 +662,9 @@
                     var body = el("div", "rp-body");
                     body.appendChild(el("div", "rp-title", r.title));
                     if (r.channel) body.appendChild(el("div", "rp-channel", r.channel));
-                    if (r.review) body.appendChild(el("p", "rp-snippet", r.review.replace(/\s+/g, " ").trim()));
+                    // Spoiler-flagged reviews never show a snippet here; inline spoilers are already masked in r.review.
+                    if (r.spoiler) body.appendChild(el("p", "rp-snippet rp-spoiler-note", "⚠ Contains spoilers — open to read"));
+                    else if (r.review) body.appendChild(el("p", "rp-snippet", r.review.replace(/\s+/g, " ").trim()));
                     card.appendChild(body);
                     col.appendChild(card);
                     row.appendChild(col);
