@@ -13,6 +13,7 @@
     { "name": "channel", "type": "text", "max": 200 },
     { "name": "rating", "type": "number", "required": true, "min": 0, "max": 10 },
     { "name": "review", "type": "text", "max": 20000 },
+    { "name": "reviewHtml", "type": "text", "max": 100000 },
     { "name": "tags", "type": "json", "maxSize": 2000 },
     { "name": "watchedOn", "type": "date" },
     { "name": "created", "type": "autodate", "onCreate": true, "onUpdate": false },

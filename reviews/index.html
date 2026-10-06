@@ -10,6 +10,10 @@
     <link href="https://fonts.googleapis.com/css?family=Saira+Extra+Condensed:500,700" rel="stylesheet" type="text/css" />
     <link href="https://fonts.googleapis.com/css?family=Muli:400,400i,800,800i" rel="stylesheet" type="text/css" />
     <link href="../css/styles.css" rel="stylesheet" />
+    <!-- Quill (rich-text editor for writing reviews) + DOMPurify (sanitizes formatted reviews before display) -->
+    <link href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dompurify@3.4.16/dist/purify.min.js"></script>
     <link href="reviews.css" rel="stylesheet" />
     <!-- PocketBase SDK: reviews live in the self-hosted PocketBase (public read, owner-only write) -->
     <script src="https://cdn.jsdelivr.net/npm/pocketbase@0.25.1/dist/pocketbase.umd.js"></script>
@@ -89,7 +93,10 @@
                 <label>Watched on<input id="rv-watched" class="rv-input" type="date" /></label>
             </div>
             <label>Tags <small>(comma separated)</small><input id="rv-tags-input" class="rv-input" type="text" placeholder="tech, cooking, documentary" /></label>
-            <label>Review<textarea id="rv-review" class="rv-input" rows="7" maxlength="20000" placeholder="What did you think?"></textarea></label>
+            <div class="rv-field">
+                <span class="rv-field-label">Review <small>(Tab indents, Shift+Tab outdents)</small></span>
+                <div id="rv-review-editor" class="rv-rich-editor"></div>
+            </div>
             <p id="rv-form-error" class="rv-error" hidden></p>
             <div class="rv-dialog-actions">
                 <button id="rv-delete" class="rv-btn rv-btn-danger" type="button" hidden>Delete</button>

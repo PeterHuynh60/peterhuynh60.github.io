@@ -44,6 +44,54 @@
         return null;
     }
 
+    // ---------- formatted reviews ----------
+
+    // Only the formatting the editor produces survives; scripts, styles, images, event handlers
+    // and non-http(s) links are stripped. Indent classes are the only classes kept.
+    var SAFE = {
+        ALLOWED_TAGS: ["p", "br", "strong", "em", "u", "s", "h2", "h3", "ol", "ul", "li", "blockquote", "a", "span"],
+        ALLOWED_ATTR: ["href", "class", "data-list"],
+        ALLOWED_URI_REGEXP: /^https?:\/\//i
+    };
+    var hasPurify = typeof window.DOMPurify !== "undefined";
+    if (hasPurify) DOMPurify.addHook("afterSanitizeAttributes", function (node) {
+        if (node.hasAttribute("class")) {
+            // ql-indent-N = indentation level; ql-ui = Quill's list bullet/number marker.
+            var keep = node.getAttribute("class").split(/\s+/).filter(function (c) { return /^(ql-indent-[1-8]|ql-ui)$/.test(c); });
+            if (keep.length) node.setAttribute("class", keep.join(" ")); else node.removeAttribute("class");
+        }
+        if (node.tagName === "A") { node.setAttribute("target", "_blank"); node.setAttribute("rel", "noopener noreferrer nofollow"); }
+    });
+    // Without the sanitizer, formatted HTML is never used (the plain-text copy is shown and saved instead).
+    function sanitize(html) { return hasPurify ? DOMPurify.sanitize(html || "", SAFE) : ""; }
+
+    var quill = null;
+    function getEditor() {
+        if (quill) return quill;
+        quill = new Quill("#rv-review-editor", {
+            theme: "snow",
+            placeholder: "What did you think?",
+            modules: {
+                toolbar: [
+                    [{ header: [2, 3, false] }],
+                    ["bold", "italic", "underline", "strike"],
+                    [{ list: "ordered" }, { list: "bullet" }],
+                    [{ indent: "-1" }, { indent: "+1" }],
+                    ["blockquote", "link"],
+                    ["clean"]
+                ],
+                keyboard: {
+                    bindings: {
+                        // Tab / Shift+Tab indent and outdent the paragraph (instead of inserting a tab character).
+                        tab: { key: "Tab", handler: function () { this.quill.format("indent", "+1", "user"); return false; } },
+                        outdentAnywhere: { key: "Tab", shiftKey: true, handler: function () { this.quill.format("indent", "-1", "user"); return false; } }
+                    }
+                }
+            }
+        });
+        return quill;
+    }
+
     function thumbUrl(id) { return "https://i.ytimg.com/vi/" + id + "/hqdefault.jpg"; }
     function watchUrl(id) { return "https://www.youtube.com/watch?v=" + id; }
 
@@ -133,10 +181,19 @@
         var meta = [r.channel, formatDate(r.watchedOn) ? "Watched " + formatDate(r.watchedOn) : ""].filter(Boolean).join(" · ");
         if (meta) body.appendChild(el("div", "rv-meta", meta));
 
-        if (r.review) {
-            var text = el("p", "rv-text", r.review);
+        if (r.review || r.reviewHtml) {
+            var text;
+            if (r.reviewHtml && hasPurify) {
+                // Formatted review: sanitized HTML inside Quill's own styling (lists, indents, quotes).
+                text = el("div", "ql-editor rv-rich");
+                text.innerHTML = sanitize(r.reviewHtml);
+            } else {
+                // Plain-text review, or the sanitizer failed to load: show the plain copy (never raw HTML).
+                text = el("p", "rv-text", r.review || "");
+            }
             body.appendChild(text);
-            if (r.review.length > 320 || r.review.split("\n").length > 5) {
+            var plain = r.review || text.textContent;
+            if (plain.length > 320 || plain.split("\n").length > 5) {
                 text.classList.add("rv-clamped");
                 var more = el("button", "rv-more", "Read more");
                 more.type = "button";
@@ -273,12 +330,16 @@
         $("rv-rating").value = r ? r.rating : "";
         $("rv-watched").value = r && r.watchedOn ? r.watchedOn.slice(0, 10) : new Date().toISOString().slice(0, 10);
         $("rv-tags-input").value = r ? tagsOf(r).join(", ") : "";
-        $("rv-review").value = r ? r.review || "" : "";
+        var editor = getEditor();
+        editor.setContents([], "silent");
+        if (r && r.reviewHtml && hasPurify) editor.clipboard.dangerouslyPasteHTML(sanitize(r.reviewHtml), "silent");
+        else if (r && r.review) editor.setText(r.review, "silent");
+        editor.history.clear();
         $("rv-delete").hidden = !r;
         $("rv-form-error").hidden = true;
         setPreview(r ? r.videoId : null, r ? { title: r.title, channel: r.channel } : null);
         $("rv-editor").showModal();
-        (r ? $("rv-review") : $("rv-url")).focus();
+        if (r) editor.focus(); else $("rv-url").focus();
     }
 
     $("rv-new").addEventListener("click", function () { openEditor(null); });
@@ -295,7 +356,9 @@
             title: $("rv-title").value.trim(),
             channel: $("rv-channel").value.trim(),
             rating: parseFloat($("rv-rating").value),
-            review: $("rv-review").value.trim(),
+            // Plain-text copy powers search and the main site's preview snippets; the HTML keeps the formatting.
+            review: getEditor().getText().trim().slice(0, 20000),
+            reviewHtml: getEditor().getText().trim() ? sanitize(getEditor().root.innerHTML) : "",
             tags: $("rv-tags-input").value.split(",").map(function (t) { return t.trim().toLowerCase(); })
                 .filter(function (t, i, a) { return t && a.indexOf(t) === i; }).slice(0, 12),
             watchedOn: $("rv-watched").value ? $("rv-watched").value + " 12:00:00.000Z" : ""

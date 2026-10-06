@@ -289,6 +289,112 @@ html body {
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
+/* Formatted (rich text) reviews: Quill's .ql-editor styles give lists/indents/quotes,
+   these overrides make it sit like normal card text. */
+.rv-body .rv-rich {
+  padding: 0;
+  height: auto;
+  overflow: visible;
+  font-family: inherit;
+  font-size: 0.92rem;
+  line-height: 1.5;
+  color: var(--rv-text);
+  cursor: auto;
+}
+.rv-rich p,
+.rv-rich ol,
+.rv-rich ul {
+  margin: 0 0 0.5rem;
+}
+.rv-rich h2,
+.rv-rich h3 {
+  font-family: "Muli", sans-serif;
+  text-transform: none;
+  color: var(--rv-text);
+  margin: 0.6rem 0 0.35rem;
+}
+.rv-rich h2 { font-size: 1.15rem; font-weight: 800; }
+.rv-rich h3 { font-size: 1rem; font-weight: 800; }
+.rv-rich blockquote {
+  border-left: 4px solid var(--rv-accent);
+  padding-left: 0.75rem;
+  margin: 0.5rem 0;
+  color: var(--rv-muted);
+}
+.rv-rich a {
+  color: var(--rv-accent-dark);
+  text-decoration: underline;
+}
+.rv-body .rv-rich.rv-clamped {
+  display: block;
+  max-height: 8.5em;
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(to bottom, #000 60%, transparent);
+  mask-image: linear-gradient(to bottom, #000 60%, transparent);
+}
+
+/* Editor (Quill "snow" theme) in the add/edit dialog */
+.rv-field {
+  margin-bottom: 0.7rem;
+}
+.rv-field-label {
+  display: block;
+  font-weight: 700;
+  font-size: 0.85rem;
+  margin-bottom: 0.25rem;
+}
+.rv-field-label small {
+  font-weight: 400;
+  color: var(--rv-muted);
+}
+.rv-rich-editor {
+  min-height: 12rem;
+  max-height: 45vh;
+  overflow-y: auto;
+  font-family: inherit;
+  font-size: 0.95rem;
+  background: var(--rv-surface);
+  color: var(--rv-text);
+}
+.rv-dialog .ql-toolbar.ql-snow,
+.rv-dialog .ql-container.ql-snow {
+  border-color: var(--rv-border);
+}
+.rv-dialog .ql-toolbar.ql-snow {
+  border-radius: 0.5rem 0.5rem 0 0;
+  background: var(--rv-chip);
+}
+.rv-dialog .ql-container.ql-snow {
+  border-radius: 0 0 0.5rem 0.5rem;
+}
+.rv-dialog .ql-editor.ql-blank::before {
+  color: var(--rv-muted);
+}
+[data-theme="dark"] .rv-dialog .ql-snow .ql-stroke {
+  stroke: var(--rv-text);
+}
+[data-theme="dark"] .rv-dialog .ql-snow .ql-fill {
+  fill: var(--rv-text);
+}
+[data-theme="dark"] .rv-dialog .ql-snow .ql-picker,
+[data-theme="dark"] .rv-dialog .ql-snow .ql-picker-label {
+  color: var(--rv-text);
+}
+[data-theme="dark"] .rv-dialog .ql-snow .ql-picker-options,
+[data-theme="dark"] .rv-dialog .ql-snow .ql-tooltip {
+  background: var(--rv-surface);
+  color: var(--rv-text);
+  border-color: var(--rv-border);
+}
+[data-theme="dark"] .rv-dialog .ql-snow .ql-tooltip input[type="text"] {
+  background: var(--rv-bg);
+  color: var(--rv-text);
+  border-color: var(--rv-border);
+}
+.rv-dialog .ql-snow .ql-tooltip {
+  z-index: 5;
+}
+
 .rv-more {
   align-self: flex-start;
   border: 0;
