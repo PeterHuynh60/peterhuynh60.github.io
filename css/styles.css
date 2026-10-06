@@ -10536,6 +10536,13 @@ section.resume-section .resume-section-content {
   background: #1a1d22;
   border-color: #2a2d33;
 }
+/* The whole card is a link; keep its text normal-colored instead of the dark theme's green link color */
+[data-theme="dark"] #reviews-preview a.rp-card,
+[data-theme="dark"] #reviews-preview a.rp-card:hover,
+[data-theme="dark"] #reviews-preview a.rp-card:focus {
+  color: #d8dade;
+  text-decoration: none;
+}
 /* Extra specificity: beats the generic dark-mode "section div/span/p" text color */
 [data-theme="dark"] #reviews-preview .rp-card span.rp-rating {
   color: #fff;
