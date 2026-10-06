@@ -190,6 +190,13 @@ html body {
   overflow: hidden;
   box-shadow: var(--rv-shadow);
 }
+.rv-card {
+  scroll-margin-top: 1rem;
+  transition: box-shadow 0.3s ease;
+}
+.rv-highlight {
+  box-shadow: 0 0 0 3px var(--rv-accent), var(--rv-shadow);
+}
 .rv-thumb {
   position: relative;
   display: block;

@@ -51,8 +51,7 @@
                         <li class="nav-item"><a class="nav-link js-scroll-trigger" href="#projects-recipes">Recipes</a></li>
                     </ul>
                 </li>
-                <!-- Separate page (not an in-page section), so no js-scroll-trigger -->
-                <li class="nav-item"><a class="nav-link" href="/reviews/">Reviews</a></li>
+                <li class="nav-item"><a class="nav-link js-scroll-trigger" href="#reviews">Reviews</a></li>
                 <li class="nav-item"><a class="nav-link js-scroll-trigger" href="#education">Education</a></li>
                 <li class="nav-item">
                     <button id="theme-toggle" class="theme-toggle-btn" type="button" aria-label="Toggle dark mode" title="Toggle dark mode">
@@ -544,6 +543,20 @@
         
         <hr class="m-0" />
 
+        <!-- Preview of the latest video reviews (full list on /reviews/, data from PocketBase) -->
+        <section class="resume-section" id="reviews">
+            <div class="resume-section-content">
+                <h2 class="mb-3">Video Reviews</h2>
+                <p class="lead mb-4">Write-ups of YouTube videos I've watched and rated.</p>
+                <div class="row" id="reviews-preview">
+                    <p class="col-12 text-muted" id="reviews-preview-status">Loading reviews…</p>
+                </div>
+                <a href="/reviews/" class="btn btn-outline-primary btn-sm dash-toggle reviews-all">See all reviews &rarr;</a>
+            </div>
+        </section>
+
+        <hr class="m-0" />
+
         <section class="resume-section" id="education">
             <div class="resume-section-content">
                 <h2 class="mb-5">Education</h2>
@@ -622,6 +635,40 @@
                 localStorage.setItem("theme", "dark");
             }
         });
+    })();
+    </script>
+
+    <!-- Latest video reviews preview: 3 newest from PocketBase. User text is set with textContent. -->
+    <script>
+    (function () {
+        var row = document.getElementById("reviews-preview");
+        var status = document.getElementById("reviews-preview-status");
+        function el(tag, cls, text) { var n = document.createElement(tag); if (cls) n.className = cls; if (text != null) n.textContent = text; return n; }
+        function ratingClass(r) { return r >= 8 ? "rp-great" : r >= 6 ? "rp-good" : r >= 4 ? "rp-ok" : "rp-low"; }
+        new PocketBase("https://data.huynh.place").collection("video_reviews")
+            .getList(1, 3, { sort: "-watchedOn,-created" })
+            .then(function (res) {
+                if (!res.items.length) { status.textContent = "No reviews yet. Check back soon!"; return; }
+                status.remove();
+                res.items.forEach(function (r) {
+                    var col = el("div", "col-md-4 mb-4");
+                    var card = el("a", "rp-card");
+                    card.href = "/reviews/#r-" + r.id;
+                    var thumb = el("div", "rp-thumb");
+                    var img = el("img"); img.src = "https://i.ytimg.com/vi/" + r.videoId + "/hqdefault.jpg"; img.alt = ""; img.loading = "lazy";
+                    thumb.appendChild(img);
+                    thumb.appendChild(el("span", "rp-rating " + ratingClass(r.rating), String(r.rating).replace(/\.0$/, "") + "/10"));
+                    card.appendChild(thumb);
+                    var body = el("div", "rp-body");
+                    body.appendChild(el("div", "rp-title", r.title));
+                    if (r.channel) body.appendChild(el("div", "rp-channel", r.channel));
+                    if (r.review) body.appendChild(el("p", "rp-snippet", r.review.replace(/\s+/g, " ").trim()));
+                    card.appendChild(body);
+                    col.appendChild(card);
+                    row.appendChild(col);
+                });
+            })
+            .catch(function () { status.textContent = "Reviews are unavailable right now."; });
     })();
     </script>
 

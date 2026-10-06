@@ -102,6 +102,7 @@
 
     function renderCard(r) {
         var card = el("article", "rv-card");
+        card.id = "r-" + r.id; // linked from the main site's preview, e.g. /reviews/#r-<id>
 
         // Thumbnail; the YouTube player only loads when clicked (faster page, no tracking until then).
         var thumb = el("button", "rv-thumb");
@@ -181,9 +182,23 @@
         else statusEl.textContent = list.length === reviews.length ? reviews.length + (reviews.length === 1 ? " review" : " reviews") : "Showing " + list.length + " of " + reviews.length;
     }
 
+    // Arriving via /reviews/#r-<id>: scroll to that card, open its full text and highlight it briefly.
+    var linkedDone = false;
+    function focusLinkedReview() {
+        if (linkedDone || !/^#r-[a-z0-9]+$/.test(location.hash)) return;
+        linkedDone = true;
+        var card = document.getElementById(location.hash.slice(1));
+        if (!card) return;
+        var more = card.querySelector(".rv-more");
+        if (more) more.click();
+        card.classList.add("rv-highlight");
+        card.scrollIntoView({ behavior: "smooth", block: "start" });
+        setTimeout(function () { card.classList.remove("rv-highlight"); }, 2500);
+    }
+
     function load() {
         return pb.collection("video_reviews").getFullList({ sort: "-created" })
-            .then(function (items) { reviews = items; render(); })
+            .then(function (items) { reviews = items; render(); focusLinkedReview(); })
             .catch(function (e) { console.error(e); statusEl.textContent = "Couldn't load reviews right now. Please try again later."; });
     }
 
