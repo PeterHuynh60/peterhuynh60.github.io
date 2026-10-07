@@ -31,18 +31,9 @@
     <link href="reviews/review-reader.css" rel="stylesheet" />
     <!-- <model-viewer> web component for the interactive 3D design viewers in Projects -->
     <script type="module" src="https://cdn.jsdelivr.net/npm/@google/model-viewer@4.3.1/dist/model-viewer.min.js"></script>
-    <script>
-      // Applied before first paint so a returning visitor who picked dark
-      // doesn't see a flash of the light theme first. Default (no saved
-      // choice) follows the OS/browser preference.
-      (function () {
-        try {
-          var saved = localStorage.getItem("theme");
-          var wantsDark = saved ? saved === "dark" : window.matchMedia("(prefers-color-scheme: dark)").matches;
-          if (wantsDark) document.documentElement.setAttribute("data-theme", "dark");
-        } catch (e) {}
-      })();
-    </script>
+    <!-- Shared design system + theme (light/dark, shared with all *.huynh.place apps); applied before first paint -->
+    <link href="/shared/huynh-ui.css" rel="stylesheet" />
+    <script src="/shared/huynh-ui.js"></script>
 </head>
 <body id="page-top">
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top" id="sideNav">
@@ -70,7 +61,7 @@
                 <li class="nav-item"><a class="nav-link js-scroll-trigger" href="#reviews">Reviews</a></li>
                 <li class="nav-item"><a class="nav-link js-scroll-trigger" href="#education">Education</a></li>
                 <li class="nav-item">
-                    <button id="theme-toggle" class="theme-toggle-btn" type="button" aria-label="Toggle dark mode" title="Toggle dark mode">
+                    <button id="theme-toggle" class="theme-toggle-btn" type="button" data-hu-theme-toggle aria-label="Toggle dark mode" title="Toggle dark mode">
                         <span class="theme-toggle-icon-light">🌙</span>
                         <span class="theme-toggle-icon-dark">☀️</span>
                     </button>
@@ -639,22 +630,6 @@
     })();
     </script>
 
-    <!-- Dark mode toggle -->
-    <script>
-    (function () {
-        var btn = document.getElementById("theme-toggle");
-        btn.addEventListener("click", function () {
-            var isDark = document.documentElement.getAttribute("data-theme") === "dark";
-            if (isDark) {
-                document.documentElement.removeAttribute("data-theme");
-                localStorage.setItem("theme", "light");
-            } else {
-                document.documentElement.setAttribute("data-theme", "dark");
-                localStorage.setItem("theme", "dark");
-            }
-        });
-    })();
-    </script>
 
     <!-- Latest video reviews preview: 3 newest from PocketBase. User text is set with textContent.
          Clicking a card opens the full review in the shared reader overlay, right on this page. -->

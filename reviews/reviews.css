@@ -10,62 +10,11 @@ html body {
 .rv-wrap {
   max-width: 80rem;
   margin: 0 auto;
-  padding: 0 16px;
-}
-
-/* Header */
-.rv-header {
-  background: var(--rv-accent-dark);
-  color: #fff;
-  padding: 0.9rem 0 1.6rem;
-  margin-bottom: 1.5rem;
-}
-[data-theme="dark"] .rv-header {
-  background: #1b2b21;
-}
-.rv-header-inner {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-  flex-wrap: wrap;
-  margin-bottom: 1rem;
-}
-.rv-back {
-  color: #fff;
-  font-weight: 800;
-  text-decoration: none;
-}
-.rv-back:hover {
-  color: #fff;
-  text-decoration: underline;
-}
-.rv-header-actions {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-.rv-header .theme-toggle-btn {
-  margin: 0;
-}
-.rv-title {
-  color: #fff;
-  font-size: 3rem;
-  margin: 0;
-}
-.rv-subtitle {
-  margin: 0;
-  opacity: 0.85;
+  padding: 1.25rem 16px 0;
 }
 
 /* Buttons and inputs (base .rv-btn is in review-reader.css) */
-.rv-header .rv-btn {
-  border-color: rgba(255, 255, 255, 0.6);
-  background: rgba(255, 255, 255, 0.15);
-  color: #fff;
-}
-.rv-btn-primary,
-.rv-header .rv-btn-primary {
+.rv-btn-primary {
   background: var(--rv-accent);
   border-color: var(--rv-accent);
   color: #fff;
@@ -314,9 +263,6 @@ html body {
   .rv-form-row {
     grid-template-columns: 1fr;
     gap: 0;
-  }
-  .rv-title {
-    font-size: 2.3rem;
   }
 }
 .rv-preview {

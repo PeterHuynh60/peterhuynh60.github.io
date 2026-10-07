@@ -1,0 +1,401 @@
+/* huynh-ui: shared design system for huynh.place and its apps (B.E.T., Home Search HQ, Gym,
+   Video Reviews). Served from https://huynh.place/shared/huynh-ui.css and loaded by every app.
+   Light theme by default; dark when <html data-theme="dark"> (set by huynh-ui.js, which shares
+   the choice across all *.huynh.place sites). Everything is prefixed "hu-" so it can sit next to
+   each app's own styles (Bootstrap, Tailwind, inline styles) without collisions. */
+@import url("https://fonts.googleapis.com/css?family=Saira+Extra+Condensed:500,700|Muli:400,400i,600,700,800&display=swap");
+
+:root {
+  --hu-font-head: "Saira Extra Condensed", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --hu-font-body: "Muli", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+
+  --hu-bg: #f4f8f5;
+  --hu-surface: #ffffff;
+  --hu-surface-2: #fafcfb;
+  --hu-border: #dee2e6;
+  --hu-text: #212529;
+  --hu-muted: #6c757d;
+  --hu-accent: #55c278;
+  --hu-accent-dark: #48a869;
+  --hu-accent-soft: #e8f5ee;
+  --hu-on-accent: #ffffff;
+  --hu-chip: #eef6f1;
+  --hu-chip-border: #cfe8d8;
+  --hu-header-bg: #48a869;
+  --hu-header-text: #ffffff;
+
+  /* Status / data colors (badges, stat accents, charts) */
+  --hu-green: #2f9e5a;
+  --hu-teal: #14a085;
+  --hu-blue: #3b82c4;
+  --hu-amber: #c98516;
+  --hu-red: #c0392b;
+  --hu-slate: #5b7083;
+  --hu-purple: #7d5ba6;
+
+  --hu-radius: 0.9rem;
+  --hu-radius-sm: 0.6rem;
+  --hu-shadow: 0 2px 10px rgba(33, 37, 41, 0.06);
+  --hu-shadow-hover: 0 6px 18px rgba(33, 37, 41, 0.12);
+}
+[data-theme="dark"] {
+  --hu-bg: #121417;
+  --hu-surface: #1a1d22;
+  --hu-surface-2: #16191d;
+  --hu-border: #2a2d33;
+  --hu-text: #d8dade;
+  --hu-muted: #9a9fa8;
+  --hu-accent: #6fd694;
+  --hu-accent-dark: #55c278;
+  --hu-accent-soft: #1f2a24;
+  --hu-on-accent: #10241a;
+  --hu-chip: #1f2a24;
+  --hu-chip-border: #2f4a3a;
+  --hu-header-bg: #1b2b21;
+  --hu-header-text: #e8f5ee;
+  --hu-green: #4cc27a;
+  --hu-teal: #2fc0a2;
+  --hu-blue: #6aa8e0;
+  --hu-amber: #f2b45a;
+  --hu-red: #e5675a;
+  --hu-slate: #8a9bab;
+  --hu-purple: #a888d0;
+  --hu-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+  --hu-shadow-hover: 0 6px 18px rgba(0, 0, 0, 0.45);
+  color-scheme: dark;
+}
+
+/* Base for app pages (opt in with <body class="hu-app">) */
+body.hu-app {
+  margin: 0;
+  background: var(--hu-bg);
+  color: var(--hu-text);
+  font-family: var(--hu-font-body);
+}
+.hu-app h1, .hu-app h2, .hu-app h3, .hu-heading {
+  font-family: var(--hu-font-head);
+  font-weight: 700;
+  color: var(--hu-text);
+}
+
+/* ---------- Header shell: same bar on every app ---------- */
+.hu-shell {
+  background: var(--hu-header-bg);
+  color: var(--hu-header-text);
+  font-family: var(--hu-font-body);
+}
+.hu-shell-inner {
+  max-width: 80rem;
+  margin: 0 auto;
+  padding: 0.7rem 16px;
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  flex-wrap: wrap;
+}
+.hu-shell a.hu-home {
+  color: var(--hu-header-text);
+  font-weight: 800;
+  font-size: 0.9rem;
+  text-decoration: none;
+  padding: 0.3rem 0.8rem;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  white-space: nowrap;
+}
+.hu-shell a.hu-home:hover {
+  background: rgba(255, 255, 255, 0.24);
+  color: var(--hu-header-text);
+  text-decoration: none;
+}
+.hu-app-id {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.hu-app-icon {
+  width: 2.3rem;
+  height: 2.3rem;
+  flex: 0 0 auto;
+  border-radius: 0.6rem;
+  background: rgba(255, 255, 255, 0.2);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+}
+.hu-app-name {
+  font-family: var(--hu-font-head);
+  font-weight: 700;
+  font-size: 1.7rem;
+  line-height: 1;
+  color: var(--hu-header-text);
+  margin: 0;
+  white-space: nowrap;
+}
+.hu-app-sub {
+  display: block;
+  font-size: 0.75rem;
+  opacity: 0.85;
+  margin-top: 0.15rem;
+}
+.hu-shell-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+.hu-shell .hu-btn {
+  border-color: rgba(255, 255, 255, 0.45);
+  background: rgba(255, 255, 255, 0.14);
+  color: var(--hu-header-text);
+  box-shadow: none;
+}
+.hu-shell .hu-btn:hover {
+  background: rgba(255, 255, 255, 0.26);
+  color: var(--hu-header-text);
+}
+.hu-theme-toggle {
+  width: 2.3rem;
+  height: 2.3rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  background: rgba(255, 255, 255, 0.14);
+  cursor: pointer;
+  font-size: 1.05rem;
+  line-height: 1;
+  padding: 0;
+}
+.hu-theme-toggle:hover {
+  background: rgba(255, 255, 255, 0.26);
+}
+.hu-theme-toggle .hu-icon-dark,
+[data-theme="dark"] .hu-theme-toggle .hu-icon-light {
+  display: none;
+}
+[data-theme="dark"] .hu-theme-toggle .hu-icon-dark {
+  display: inline;
+}
+@media (max-width: 575px) {
+  .hu-app-name { font-size: 1.4rem; }
+  .hu-app-sub { display: none; }
+}
+
+/* Page container for app content */
+.hu-container {
+  max-width: 80rem;
+  margin: 0 auto;
+  padding: 1.25rem 16px 2.5rem;
+}
+
+/* ---------- Surfaces ---------- */
+.hu-card {
+  background: var(--hu-surface);
+  border: 1px solid var(--hu-border);
+  border-radius: var(--hu-radius);
+  box-shadow: var(--hu-shadow);
+  color: var(--hu-text);
+}
+.hu-panel {
+  background: var(--hu-surface-2);
+  border: 1px solid var(--hu-border);
+  border-radius: var(--hu-radius);
+  padding: 1rem;
+}
+.hu-section-title {
+  font-family: var(--hu-font-head);
+  font-weight: 700;
+  font-size: 1.4rem;
+  margin: 0 0 0.6rem;
+  color: var(--hu-text);
+}
+
+/* Stat tile: label, big value, colored accent bar on top */
+.hu-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+  gap: 0.8rem;
+}
+.hu-stat {
+  background: var(--hu-surface);
+  border: 1px solid var(--hu-border);
+  border-top: 3px solid var(--hu-slate);
+  border-radius: 0.75rem;
+  box-shadow: var(--hu-shadow);
+  padding: 0.7rem 0.9rem;
+  text-align: center;
+}
+.hu-stat-label {
+  font-family: var(--hu-font-head);
+  font-weight: 700;
+  font-size: 0.85rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--hu-muted);
+}
+.hu-stat-value {
+  font-family: var(--hu-font-head);
+  font-weight: 700;
+  font-size: 1.8rem;
+  line-height: 1.1;
+  color: var(--hu-text);
+}
+.hu-stat.hu-green  { border-top-color: var(--hu-green); }
+.hu-stat.hu-blue   { border-top-color: var(--hu-blue); }
+.hu-stat.hu-teal   { border-top-color: var(--hu-teal); }
+.hu-stat.hu-amber  { border-top-color: var(--hu-amber); }
+.hu-stat.hu-red    { border-top-color: var(--hu-red); }
+.hu-stat.hu-purple { border-top-color: var(--hu-purple); }
+.hu-stat.hu-green .hu-stat-value  { color: var(--hu-green); }
+.hu-stat.hu-blue .hu-stat-value   { color: var(--hu-blue); }
+.hu-stat.hu-teal .hu-stat-value   { color: var(--hu-teal); }
+.hu-stat.hu-amber .hu-stat-value  { color: var(--hu-amber); }
+.hu-stat.hu-red .hu-stat-value    { color: var(--hu-red); }
+.hu-stat.hu-purple .hu-stat-value { color: var(--hu-purple); }
+
+/* ---------- Buttons ---------- */
+.hu-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  border: 2px solid var(--hu-accent);
+  background: var(--hu-surface);
+  color: var(--hu-accent-dark);
+  border-radius: 999px;
+  padding: 0.35rem 1rem;
+  font-family: var(--hu-font-body);
+  font-weight: 700;
+  font-size: 0.9rem;
+  line-height: 1.3;
+  cursor: pointer;
+  text-decoration: none;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+.hu-btn:hover {
+  text-decoration: none;
+  color: var(--hu-accent-dark);
+  transform: translateY(-1px);
+}
+.hu-btn-primary {
+  background: var(--hu-accent);
+  color: var(--hu-on-accent);
+  box-shadow: 0 2px 8px rgba(85, 194, 120, 0.3);
+}
+.hu-btn-primary:hover {
+  background: var(--hu-accent-dark);
+  color: var(--hu-on-accent);
+  box-shadow: 0 4px 14px rgba(85, 194, 120, 0.4);
+}
+.hu-btn-danger {
+  border-color: var(--hu-red);
+  color: var(--hu-red);
+}
+.hu-btn-danger:hover { color: var(--hu-red); }
+.hu-btn-ghost {
+  border-color: var(--hu-border);
+  color: var(--hu-text);
+}
+.hu-btn-ghost:hover { color: var(--hu-text); }
+.hu-btn-small {
+  padding: 0.15rem 0.75rem;
+  font-size: 0.8rem;
+}
+.hu-btn:disabled,
+.hu-btn[aria-disabled="true"] {
+  opacity: 0.45;
+  cursor: default;
+  transform: none;
+}
+
+/* ---------- Inputs ---------- */
+.hu-input,
+.hu-select,
+.hu-textarea {
+  width: 100%;
+  border: 1px solid var(--hu-border);
+  background: var(--hu-surface);
+  color: var(--hu-text);
+  border-radius: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  font-family: var(--hu-font-body);
+  font-size: 0.95rem;
+}
+.hu-label {
+  display: block;
+  font-weight: 700;
+  font-size: 0.8rem;
+  letter-spacing: 0.03em;
+  color: var(--hu-muted);
+  margin-bottom: 0.25rem;
+}
+
+/* ---------- Badges and chips ---------- */
+.hu-badge {
+  display: inline-block;
+  padding: 0.15rem 0.6rem;
+  border-radius: 0.45rem;
+  font-weight: 800;
+  font-size: 0.78rem;
+  line-height: 1.4;
+  color: #fff;
+  background: var(--hu-slate);
+}
+.hu-badge.hu-green  { background: var(--hu-green); }
+.hu-badge.hu-teal   { background: var(--hu-teal); }
+.hu-badge.hu-blue   { background: var(--hu-blue); }
+.hu-badge.hu-amber  { background: var(--hu-amber); }
+.hu-badge.hu-red    { background: var(--hu-red); }
+.hu-badge.hu-purple { background: var(--hu-purple); }
+[data-theme="dark"] .hu-badge { color: #10141a; }
+.hu-chip {
+  display: inline-block;
+  border: 1px solid var(--hu-chip-border);
+  background: var(--hu-chip);
+  color: var(--hu-text);
+  border-radius: 999px;
+  padding: 0.15rem 0.7rem;
+  font-size: 0.8rem;
+}
+
+/* ---------- Tables ---------- */
+.hu-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 0.88rem;
+  color: var(--hu-text);
+}
+.hu-table th {
+  font-family: var(--hu-font-head);
+  font-weight: 700;
+  font-size: 0.85rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--hu-muted);
+  text-align: left;
+  padding: 0.55rem 0.7rem;
+  border-bottom: 2px solid var(--hu-border);
+  background: var(--hu-surface-2);
+}
+.hu-table td {
+  padding: 0.5rem 0.7rem;
+  border-bottom: 1px solid var(--hu-border);
+}
+.hu-table tbody tr:hover td {
+  background: var(--hu-accent-soft);
+}
+
+/* ---------- Focus ---------- */
+.hu-btn:focus-visible,
+.hu-input:focus-visible,
+.hu-select:focus-visible,
+.hu-textarea:focus-visible,
+.hu-theme-toggle:focus-visible,
+.hu-shell a.hu-home:focus-visible {
+  outline: 3px solid var(--hu-accent);
+  outline-offset: 2px;
+}

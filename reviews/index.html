@@ -7,9 +7,10 @@
     <meta name="author" content="Peter Huynh" />
     <title>Video Reviews | Peter Huynh</title>
     <link rel="icon" type="image/x-icon" href="../assets/img/favicon.ico" />
-    <link href="https://fonts.googleapis.com/css?family=Saira+Extra+Condensed:500,700" rel="stylesheet" type="text/css" />
-    <link href="https://fonts.googleapis.com/css?family=Muli:400,400i,800,800i" rel="stylesheet" type="text/css" />
     <link href="../css/styles.css" rel="stylesheet" />
+    <!-- Shared design system (fonts, colors, header, components) + theme shared with all *.huynh.place apps -->
+    <link href="/shared/huynh-ui.css" rel="stylesheet" />
+    <script src="/shared/huynh-ui.js"></script>
     <!-- Quill (rich-text editor for writing reviews) + DOMPurify (sanitizes formatted reviews before display) -->
     <link href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script>
@@ -19,33 +20,26 @@
     <link href="reviews.css" rel="stylesheet" />
     <!-- PocketBase SDK: reviews live in the self-hosted PocketBase (public read, owner-only write) -->
     <script src="https://cdn.jsdelivr.net/npm/pocketbase@0.25.1/dist/pocketbase.umd.js"></script>
-    <script>
-      // Same theme preference as the main site (same origin, same localStorage key).
-      (function () {
-        try {
-          var saved = localStorage.getItem("theme");
-          var wantsDark = saved ? saved === "dark" : window.matchMedia("(prefers-color-scheme: dark)").matches;
-          if (wantsDark) document.documentElement.setAttribute("data-theme", "dark");
-        } catch (e) {}
-      })();
-    </script>
 </head>
-<body>
-    <header class="rv-header">
-        <div class="rv-wrap rv-header-inner">
-            <a class="rv-back" href="/">&larr; huynh.place</a>
-            <div class="rv-header-actions">
-                <button id="rv-new" class="rv-btn rv-btn-primary" type="button" hidden>+ New review</button>
-                <button id="rv-auth" class="rv-btn" type="button">Log in</button>
-                <button id="theme-toggle" class="theme-toggle-btn" type="button" aria-label="Toggle dark mode" title="Toggle dark mode">
-                    <span class="theme-toggle-icon-light">🌙</span>
-                    <span class="theme-toggle-icon-dark">☀️</span>
+<body class="hu-app">
+    <!-- Shared app header (same bar as B.E.T., Home Search HQ and Gym) -->
+    <header class="hu-shell">
+        <div class="hu-shell-inner">
+            <a class="hu-home" href="/">&larr; huynh.place</a>
+            <div class="hu-app-id">
+                <span class="hu-app-icon" aria-hidden="true">🎬</span>
+                <div>
+                    <h1 class="hu-app-name">Video Reviews</h1>
+                    <span class="hu-app-sub">YouTube videos I've watched, rated and written up</span>
+                </div>
+            </div>
+            <div class="hu-shell-actions">
+                <button id="rv-new" class="hu-btn hu-btn-small" type="button" hidden>+ New review</button>
+                <button id="rv-auth" class="hu-btn hu-btn-small" type="button">Log in</button>
+                <button class="hu-theme-toggle" type="button" data-hu-theme-toggle aria-label="Toggle dark mode" title="Toggle dark mode">
+                    <span class="hu-icon-light">🌙</span><span class="hu-icon-dark">☀️</span>
                 </button>
             </div>
-        </div>
-        <div class="rv-wrap">
-            <h1 class="rv-title">Video Reviews</h1>
-            <p class="rv-subtitle">YouTube videos I've watched, rated and written up.</p>
         </div>
     </header>
 

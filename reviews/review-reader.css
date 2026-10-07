@@ -1,28 +1,18 @@
 /* Shared review styles (cards' building blocks + the reader overlay), used by both the main page
    and /reviews/. Page layout lives in reviews.css (only loaded on /reviews/). */
+/* Colors come from the shared design system (/shared/huynh-ui.css), which also handles dark mode;
+   the fallbacks only matter if that file fails to load. */
 :root {
-  --rv-bg: #f6faf7;
-  --rv-surface: #ffffff;
-  --rv-border: #dee2e6;
-  --rv-text: #212529;
-  --rv-muted: #6c757d;
-  --rv-accent: #55c278;
-  --rv-accent-dark: #48a869;
-  --rv-chip: #eef6f1;
-  --rv-chip-border: #cfe8d8;
-  --rv-shadow: 0 2px 10px rgba(33, 37, 41, 0.06);
-}
-[data-theme="dark"] {
-  --rv-bg: #121417;
-  --rv-surface: #1a1d22;
-  --rv-border: #2a2d33;
-  --rv-text: #d8dade;
-  --rv-muted: #9a9fa8;
-  --rv-accent: #6fd694;
-  --rv-accent-dark: #55c278;
-  --rv-chip: #1f2a24;
-  --rv-chip-border: #2f4a3a;
-  --rv-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+  --rv-bg: var(--hu-bg, #f6faf7);
+  --rv-surface: var(--hu-surface, #ffffff);
+  --rv-border: var(--hu-border, #dee2e6);
+  --rv-text: var(--hu-text, #212529);
+  --rv-muted: var(--hu-muted, #6c757d);
+  --rv-accent: var(--hu-accent, #55c278);
+  --rv-accent-dark: var(--hu-accent-dark, #48a869);
+  --rv-chip: var(--hu-chip, #eef6f1);
+  --rv-chip-border: var(--hu-chip-border, #cfe8d8);
+  --rv-shadow: var(--hu-shadow, 0 2px 10px rgba(33, 37, 41, 0.06));
 }
 
 /* Buttons and chips */

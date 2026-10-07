@@ -453,12 +453,7 @@
     $("rv-search").addEventListener("input", function () { page = 1; render(); });
     $("rv-sort").addEventListener("change", function () { page = 1; render(); });
 
-    $("theme-toggle").addEventListener("click", function () {
-        var isDark = document.documentElement.getAttribute("data-theme") === "dark";
-        if (isDark) document.documentElement.removeAttribute("data-theme");
-        else document.documentElement.setAttribute("data-theme", "dark");
-        try { localStorage.setItem("theme", isDark ? "light" : "dark"); } catch (e) {}
-    });
+    // Dark mode toggle: handled by the shared /shared/huynh-ui.js (data-hu-theme-toggle).
 
     updateAuthUi();
     load();
