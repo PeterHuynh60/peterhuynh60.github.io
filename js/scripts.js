@@ -18,13 +18,11 @@
                 ? target
                 : $("[name=" + this.hash.slice(1) + "]");
             if (target.length) {
-                $("html, body").animate(
-                    {
-                        scrollTop: target.offset().top,
-                    },
-                    1000,
-                    "easeInOutExpo"
-                );
+                // Native smooth scrolling runs off the main thread, so it stays smooth while
+                // heavy content (3D model viewers, charts) loads during the scroll. (The old
+                // jQuery animation stuttered whenever the 3D bookends started loading mid-scroll.)
+                var reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+                window.scrollTo({ top: target.offset().top, behavior: reduceMotion ? "auto" : "smooth" });
                 return false;
             }
         }
