@@ -10462,7 +10462,13 @@ section.resume-section .resume-section-content {
 }
 [data-theme="dark"] .case-study:nth-child(2) { border-top-color: #f2a93b; }
 
-/* Video Reviews preview (latest 3, linking to /reviews/) */
+/* ===================================================================
+   Shared widget design system: the panel (.mini-dash), stat tiles, preview
+   cards (.rp-card: video reviews and home listings) and the panel link button.
+   Used by the B.E.T., Home Search HQ and Video Reviews widgets.
+   =================================================================== */
+
+/* Preview card: 16:9 image, corner badge, title, subtitle, details */
 .rp-card {
   display: flex;
   flex-direction: column;
@@ -10494,6 +10500,18 @@ section.resume-section .resume-section-content {
   object-fit: cover;
   display: block;
 }
+/* No photo (masked/private listings): soft tinted tile with an icon */
+.rp-thumb-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #e8f5ee 0%, #d4ecdf 100%);
+}
+.rp-thumb-glyph {
+  font-size: 3rem;
+  line-height: 1;
+}
+/* Corner badge: rating (reviews) or status (homes) */
 .rp-rating {
   position: absolute;
   top: 0.6rem;
@@ -10506,10 +10524,15 @@ section.resume-section .resume-section-content {
   color: #fff;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
 }
-.rp-great { background: #2f9e5a; }
-.rp-good  { background: #3b82c4; }
-.rp-ok    { background: #c98516; }
-.rp-low   { background: #c0392b; }
+.rp-great,
+.rp-st-good     { background: #2f9e5a; }
+.rp-good,
+.rp-st-excellent { background: #3b82c4; }
+.rp-ok,
+.rp-st-ok       { background: #c98516; }
+.rp-low         { background: #c0392b; }
+.rp-st-bought   { background: #14a085; }
+.rp-st-waiting  { background: #5b7083; }
 .rp-body {
   padding: 0.75rem 0.9rem 0.9rem;
 }
@@ -10531,33 +10554,124 @@ section.resume-section .resume-section-content {
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
+.rp-price {
+  margin-top: 0.45rem;
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #2f9e5a;
+}
+.rp-note {
+  margin-top: 0.2rem;
+  font-size: 0.78rem;
+  color: #6c757d;
+}
 .rp-spoiler-note {
   font-weight: 700;
   color: #c98516;
 }
-[data-theme="dark"] #reviews-preview .rp-card p.rp-spoiler-note {
-  color: #f2b45a;
+
+/* Panel around each widget's content */
+.mini-dash {
+  margin-top: 0.75rem;
+  padding: 1rem 1rem 0.4rem;
+  border: 1px solid #dee2e6;
+  border-radius: 0.9rem;
+  background: #fafcfb;
 }
-.reviews-all {
-  margin-top: 0;
+.mini-dash .row {
+  margin-left: -0.4rem;
+  margin-right: -0.4rem;
 }
+.mini-dash .row > div {
+  padding-left: 0.4rem;
+  padding-right: 0.4rem;
+  margin-bottom: 0.8rem;
+}
+/* Stat tiles and chart: same card look as preview cards, colored accent bar on top */
+.mini-dash .card {
+  border: 1px solid #dee2e6 !important;
+  border-top: 3px solid #adb5bd !important;
+  border-radius: 0.75rem;
+  background: #fff;
+  box-shadow: 0 2px 10px rgba(33, 37, 41, 0.06);
+}
+.mini-dash .card.border-success { border-top-color: #2f9e5a !important; }
+.mini-dash .card.border-primary { border-top-color: #3b82c4 !important; }
+.mini-dash .card.border-info    { border-top-color: #17a2b8 !important; }
+.mini-dash .card.border-warning { border-top-color: #c98516 !important; }
+.mini-dash .card-body {
+  padding: 0.6rem 0.7rem;
+}
+.mini-dash .card-title {
+  font-size: 0.8rem;
+  margin-bottom: 0.15rem;
+}
+.mini-dash h2 {
+  font-size: 1.5rem;
+}
+.mini-dash > .card {
+  margin-bottom: 0.8rem;
+}
+
+/* Panel link: the one "open the full thing" button style */
+.panel-link {
+  display: inline-block;
+  margin: 0.2rem 0 0.8rem;
+  padding: 0.4rem 1.1rem;
+  border-radius: 999px;
+  background: #55c278;
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.9rem;
+  text-decoration: none;
+  box-shadow: 0 2px 8px rgba(85, 194, 120, 0.3);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+.panel-link:hover,
+.panel-link:focus {
+  background: #48a869;
+  color: #fff;
+  text-decoration: none;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(85, 194, 120, 0.4);
+}
+
+/* Dark mode (extra specificity beats the generic dark "section div/span/p/a" rules) */
+[data-theme="dark"] .mini-dash {
+  border-color: #2a2d33;
+  background: #16191d;
+}
+[data-theme="dark"] .mini-dash .card,
 [data-theme="dark"] .rp-card {
   background: #1a1d22;
-  border-color: #2a2d33;
+  border-color: #2a2d33 !important;
 }
-/* The whole card is a link; keep its text normal-colored instead of the dark theme's green link color */
-[data-theme="dark"] #reviews-preview a.rp-card,
-[data-theme="dark"] #reviews-preview a.rp-card:hover,
-[data-theme="dark"] #reviews-preview a.rp-card:focus {
+[data-theme="dark"] .mini-dash a.rp-card,
+[data-theme="dark"] .mini-dash a.rp-card:hover,
+[data-theme="dark"] .mini-dash a.rp-card:focus {
   color: #d8dade;
   text-decoration: none;
 }
-/* Extra specificity: beats the generic dark-mode "section div/span/p" text color */
-[data-theme="dark"] #reviews-preview .rp-card span.rp-rating {
+[data-theme="dark"] .mini-dash .rp-card span.rp-rating {
   color: #fff;
 }
-[data-theme="dark"] #reviews-preview .rp-card div.rp-channel {
+[data-theme="dark"] .mini-dash .rp-card div.rp-channel,
+[data-theme="dark"] .mini-dash .rp-card div.rp-note {
   color: #9a9fa8;
+}
+[data-theme="dark"] .mini-dash .rp-card div.rp-price {
+  color: #6fd694;
+}
+[data-theme="dark"] .mini-dash .rp-card p.rp-spoiler-note {
+  color: #f2b45a;
+}
+[data-theme="dark"] .rp-thumb-icon {
+  background: linear-gradient(135deg, #1f2a24 0%, #182019 100%);
+}
+[data-theme="dark"] .mini-dash a.panel-link,
+[data-theme="dark"] .mini-dash a.panel-link:hover {
+  color: #10241a;
+  background: #6fd694;
 }
 
 /* 3D design viewers (<model-viewer>) under each 3D Design project */
@@ -10594,43 +10708,6 @@ section.resume-section .resume-section-content {
 [data-theme="dark"] .model-card figcaption {
   color: #9a9fa8;
   border-top-color: #2a2d33;
-}
-
-/* Compact live dashboard widgets (B.E.T., Home Search HQ) shown under their
-   project descriptions; the full dashboards are one click away. */
-.mini-dash {
-  margin-top: 0.75rem;
-  padding: 0.75rem 0.75rem 0.25rem;
-  border: 1px solid #dee2e6;
-  border-radius: 0.5rem;
-}
-.mini-dash .row {
-  margin-left: -0.35rem;
-  margin-right: -0.35rem;
-}
-.mini-dash .row > div {
-  padding-left: 0.35rem;
-  padding-right: 0.35rem;
-  margin-bottom: 0.7rem;
-}
-.mini-dash .card-body {
-  padding: 0.5rem 0.6rem;
-}
-.mini-dash .card-title {
-  font-size: 0.8rem;
-  margin-bottom: 0.15rem;
-}
-.mini-dash h2 {
-  font-size: 1.5rem;
-}
-.mini-dash > .card {
-  margin-bottom: 0.7rem;
-}
-.mini-dash > .btn {
-  margin-bottom: 0.5rem;
-}
-[data-theme="dark"] .mini-dash {
-  border-color: #2a2d33;
 }
 
 /* ===================================================================
