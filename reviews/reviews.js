@@ -44,27 +44,10 @@
         return null;
     }
 
-    // ---------- formatted reviews ----------
-
-    // Only the formatting the editor produces survives; scripts, styles, images, event handlers
-    // and non-http(s) links are stripped. Indent classes are the only classes kept.
-    var SAFE = {
-        ALLOWED_TAGS: ["p", "br", "strong", "em", "u", "s", "h2", "h3", "ol", "ul", "li", "blockquote", "a", "span", "mark"],
-        ALLOWED_ATTR: ["href", "class", "data-list"],
-        ALLOWED_URI_REGEXP: /^https?:\/\//i
-    };
-    var hasPurify = typeof window.DOMPurify !== "undefined";
-    if (hasPurify) DOMPurify.addHook("afterSanitizeAttributes", function (node) {
-        if (node.hasAttribute("class")) {
-            // ql-indent-N = indentation level; ql-ui = Quill's list bullet/number marker;
-            // ql-firstline-1 = first-line indent; ql-spoiler = hidden-until-clicked text.
-            var keep = node.getAttribute("class").split(/\s+/).filter(function (c) { return /^(ql-indent-[1-8]|ql-ui|ql-firstline-1|ql-spoiler)$/.test(c); });
-            if (keep.length) node.setAttribute("class", keep.join(" ")); else node.removeAttribute("class");
-        }
-        if (node.tagName === "A") { node.setAttribute("target", "_blank"); node.setAttribute("rel", "noopener noreferrer nofollow"); }
-    });
-    // Without the sanitizer, formatted HTML is never used (the plain-text copy is shown and saved instead).
-    function sanitize(html) { return hasPurify ? DOMPurify.sanitize(html || "", SAFE) : ""; }
+    // ---------- shared with the main page (review-reader.js) ----------
+    var RR = window.ReviewReader;
+    var sanitize = RR.sanitize, hasPurify = RR.hasPurify, thumbUrl = RR.thumbUrl, watchUrl = RR.watchUrl, tagsOf = RR.tagsOf,
+        makeThumb = RR.makeThumb, makeHead = RR.makeHead, makeReviewText = RR.makeReviewText, spoilerHolder = RR.spoilerHolder;
 
     var quill = null;
     function registerFormats() {
@@ -191,27 +174,6 @@
         return quill;
     }
 
-    // Inline spoilers: blacked out until clicked (or focused + Enter/Space); clicking again re-hides.
-    function activateInlineSpoilers(container) {
-        container.querySelectorAll(".ql-spoiler").forEach(function (s) {
-            s.tabIndex = 0;
-            s.setAttribute("role", "button");
-            s.setAttribute("aria-pressed", "false");
-            s.title = "Spoiler — click to reveal";
-            var toggle = function (e) {
-                e.preventDefault();
-                var shown = s.classList.toggle("rv-revealed");
-                s.setAttribute("aria-pressed", shown ? "true" : "false");
-                s.title = shown ? "Click to hide again" : "Spoiler — click to reveal";
-            };
-            s.addEventListener("click", toggle);
-            s.addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") toggle(e); });
-        });
-    }
-
-    function thumbUrl(id) { return "https://i.ytimg.com/vi/" + id + "/hqdefault.jpg"; }
-    function watchUrl(id) { return "https://www.youtube.com/watch?v=" + id; }
-
     function fetchVideoInfo(id) {
         var target = encodeURIComponent(watchUrl(id));
         return fetch("https://www.youtube.com/oembed?format=json&url=" + target)
@@ -223,16 +185,6 @@
     }
 
     // ---------- rendering ----------
-
-    function ratingClass(r) { return r >= 8 ? "rv-rating-great" : r >= 6 ? "rv-rating-good" : r >= 4 ? "rv-rating-ok" : "rv-rating-low"; }
-
-    function formatDate(pbDate) {
-        if (!pbDate) return "";
-        var d = new Date(pbDate.replace(" ", "T"));
-        return isNaN(d) ? "" : d.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric", timeZone: "UTC" });
-    }
-
-    function tagsOf(r) { return Array.isArray(r.tags) ? r.tags : []; }
 
     function matches(r, q) {
         if (activeTag && tagsOf(r).indexOf(activeTag) < 0) return false;
@@ -265,81 +217,8 @@
         });
     }
 
-    // ---------- building blocks shared by cards and the reader ----------
-
-    // Thumbnail; the YouTube player only loads when clicked (faster page, no tracking until then).
-    function makeThumb(r) {
-        var thumb = el("button", "rv-thumb");
-        thumb.type = "button";
-        thumb.setAttribute("aria-label", "Play " + r.title);
-        var img = el("img"); img.src = thumbUrl(r.videoId); img.alt = ""; img.loading = "lazy";
-        thumb.appendChild(img);
-        thumb.addEventListener("click", function () {
-            var frame = document.createElement("iframe");
-            frame.className = "rv-player";
-            frame.src = "https://www.youtube-nocookie.com/embed/" + r.videoId + "?autoplay=1&rel=0";
-            frame.title = r.title;
-            frame.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
-            frame.allowFullscreen = true;
-            thumb.replaceWith(frame);
-        });
-        return thumb;
-    }
-
-    function makeHead(r, tag) {
-        var frag = document.createDocumentFragment();
-        var head = el("div", "rv-card-head");
-        var title = el("a", "rv-card-title", r.title);
-        title.href = watchUrl(r.videoId); title.target = "_blank"; title.rel = "noopener noreferrer";
-        if (tag) { var h = el(tag, "rv-reader-title"); h.appendChild(title); head.appendChild(h); } else head.appendChild(title);
-        head.appendChild(el("span", "rv-rating " + ratingClass(r.rating), (+r.rating).toString().replace(/\.0$/, "") + "/10"));
-        frag.appendChild(head);
-        var meta = [r.channel, formatDate(r.watchedOn) ? "Watched " + formatDate(r.watchedOn) : ""].filter(Boolean).join(" · ");
-        if (meta) frag.appendChild(el("div", "rv-meta", meta));
-        return frag;
-    }
-
-    function makeReviewText(r) {
-        var text;
-        if (r.reviewHtml && hasPurify) {
-            // Formatted review: sanitized HTML inside Quill's own styling (lists, indents, quotes).
-            text = el("div", "ql-editor rv-rich");
-            text.innerHTML = sanitize(r.reviewHtml);
-            activateInlineSpoilers(text);
-        } else {
-            // Plain-text review, or the sanitizer failed to load: show the plain copy (never raw HTML).
-            text = el("p", "rv-text", r.review || "");
-        }
-        return text;
-    }
-
-    // Whole-review spoiler flag: content sits behind a click-to-reveal cover until revealed.
-    function spoilerHolder(parent, r, revealed) {
-        if (!r.spoiler || revealed) return parent;
-        var holder = el("div", "rv-spoiler-wrap rv-spoiler-hidden");
-        var cover = el("button", "rv-spoiler-cover", "\u26A0 This review contains spoilers \u2014 click to reveal");
-        cover.type = "button";
-        cover.addEventListener("click", function () { holder.classList.remove("rv-spoiler-hidden"); cover.remove(); });
-        holder.appendChild(cover);
-        parent.appendChild(holder);
-        return holder;
-    }
-
-    function makeTags(r) {
-        var tags = tagsOf(r);
-        if (!tags.length) return null;
-        var tagWrap = el("div", "rv-card-tags");
-        tags.forEach(function (t) {
-            var chip = el("button", "rv-chip rv-chip-small", t);
-            chip.type = "button";
-            chip.addEventListener("click", function () {
-                if ($("rv-reader").open) $("rv-reader").close();
-                activeTag = t; render(); window.scrollTo({ top: 0, behavior: "smooth" });
-            });
-            tagWrap.appendChild(chip);
-        });
-        return tagWrap;
-    }
+    function onTagClick(t) { activeTag = t; render(); window.scrollTo({ top: 0, behavior: "smooth" }); }
+    function makeTags(r) { return RR.makeTags(r, onTagClick); }
 
     function renderCard(r) {
         var card = el("article", "rv-card");
@@ -379,29 +258,9 @@
         return card;
     }
 
-    // ---------- reader (full review over the page) ----------
-
+    // Full review in the shared reader overlay (with an Edit button when logged in as the owner).
     function openReader(r, revealed) {
-        var content = $("rv-reader-content");
-        content.textContent = "";
-        content.appendChild(makeThumb(r));
-        var body = el("div", "rv-reader-body");
-        body.appendChild(makeHead(r, "h2"));
-        var tags = makeTags(r);
-        if (tags) body.appendChild(tags);
-        if (r.review || r.reviewHtml) spoilerHolder(body, r, revealed).appendChild(makeReviewText(r));
-        if (isOwner()) {
-            var edit = el("button", "rv-btn rv-btn-small", "Edit");
-            edit.type = "button";
-            edit.addEventListener("click", function () { $("rv-reader").close(); openEditor(r); });
-            body.appendChild(edit);
-        }
-        content.appendChild(body);
-        if (location.hash !== "#r-" + r.id) history.replaceState(null, "", "#r-" + r.id); // shareable link
-        document.body.classList.add("rv-noscroll");
-        $("rv-reader").showModal();
-        $("rv-reader").scrollTop = 0;
-        $("rv-reader-close").focus();
+        RR.open(r, { revealed: revealed, setHash: true, onTag: onTagClick, onEdit: isOwner() ? function () { openEditor(r); } : null });
     }
 
     function render() {
@@ -431,16 +290,6 @@
         }
         if (r) openReader(r, false);
     }
-
-    // Closing the reader: stop any playing video, unlock scrolling, drop the review from the address.
-    var reader = $("rv-reader");
-    $("rv-reader-close").addEventListener("click", function () { reader.close(); });
-    reader.addEventListener("click", function (e) { if (e.target === reader) reader.close(); }); // click outside the content
-    reader.addEventListener("close", function () {
-        $("rv-reader-content").textContent = "";
-        document.body.classList.remove("rv-noscroll");
-        if (/^#r-/.test(location.hash)) history.replaceState(null, "", location.pathname + location.search);
-    });
 
     function load() {
         return pb.collection("video_reviews").getFullList({ sort: "-created" })

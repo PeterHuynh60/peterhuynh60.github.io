@@ -14,6 +14,8 @@
     <link href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/dompurify@3.4.16/dist/purify.min.js"></script>
+    <!-- Shared with the main page's Video Reviews preview -->
+    <link href="review-reader.css" rel="stylesheet" />
     <link href="reviews.css" rel="stylesheet" />
     <!-- PocketBase SDK: reviews live in the self-hosted PocketBase (public read, owner-only write) -->
     <script src="https://cdn.jsdelivr.net/npm/pocketbase@0.25.1/dist/pocketbase.umd.js"></script>
@@ -60,12 +62,6 @@
         <p id="rv-status" class="rv-status">Loading reviews…</p>
         <div id="rv-grid" class="rv-grid"></div>
     </main>
-
-    <!-- Reader: full review over the page (opened by "Read more" or a /reviews/#r-<id> link) -->
-    <dialog id="rv-reader" class="rv-dialog rv-reader" aria-label="Full review">
-        <button id="rv-reader-close" class="rv-reader-close" type="button" aria-label="Close">&times;</button>
-        <div id="rv-reader-content"></div>
-    </dialog>
 
     <!-- Log in -->
     <dialog id="rv-login" class="rv-dialog">
@@ -114,6 +110,7 @@
         </form>
     </dialog>
 
+    <script src="review-reader.js"></script>
     <script src="reviews.js"></script>
 </body>
 </html>

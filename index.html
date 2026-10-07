@@ -13,6 +13,11 @@
     <link href="css/styles.css" rel="stylesheet" />
     <!-- PocketBase SDK (powers the B.E.T. and Home Search HQ dashboard widgets below) -->
     <script src="https://cdn.jsdelivr.net/npm/pocketbase@0.25.1/dist/pocketbase.umd.js"></script>
+    <!-- Video review reader overlay (shared with /reviews/): Quill's base styles for formatted text,
+         DOMPurify to sanitize it, and the shared reader styles -->
+    <link href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.core.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/dompurify@3.4.16/dist/purify.min.js"></script>
+    <link href="reviews/review-reader.css" rel="stylesheet" />
     <!-- <model-viewer> web component for the interactive 3D design viewers in Projects -->
     <script type="module" src="https://cdn.jsdelivr.net/npm/@google/model-viewer@4.3.1/dist/model-viewer.min.js"></script>
     <script>
@@ -638,7 +643,9 @@
     })();
     </script>
 
-    <!-- Latest video reviews preview: 3 newest from PocketBase. User text is set with textContent. -->
+    <!-- Latest video reviews preview: 3 newest from PocketBase. User text is set with textContent.
+         Clicking a card opens the full review in the shared reader overlay, right on this page. -->
+    <script src="reviews/review-reader.js"></script>
     <script>
     (function () {
         var row = document.getElementById("reviews-preview");
@@ -653,7 +660,12 @@
                 res.items.forEach(function (r) {
                     var col = el("div", "col-md-4 mb-4");
                     var card = el("a", "rp-card");
-                    card.href = "/reviews/#r-" + r.id;
+                    card.href = "/reviews/#r-" + r.id; // fallback, and for opening in a new tab
+                    card.addEventListener("click", function (e) {
+                        if (!window.ReviewReader || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+                        e.preventDefault();
+                        window.ReviewReader.open(r, { revealed: false });
+                    });
                     var thumb = el("div", "rp-thumb");
                     var img = el("img"); img.src = "https://i.ytimg.com/vi/" + r.videoId + "/hqdefault.jpg"; img.alt = ""; img.loading = "lazy";
                     thumb.appendChild(img);

@@ -1,29 +1,6 @@
-/* Video Reviews page. Reuses the main site's styles.css (fonts, Bootstrap base, theme toggle)
-   but has no sidebar, so the sidebar padding from styles.css is cancelled here. */
-:root {
-  --rv-bg: #f6faf7;
-  --rv-surface: #ffffff;
-  --rv-border: #dee2e6;
-  --rv-text: #212529;
-  --rv-muted: #6c757d;
-  --rv-accent: #55c278;
-  --rv-accent-dark: #48a869;
-  --rv-chip: #eef6f1;
-  --rv-chip-border: #cfe8d8;
-  --rv-shadow: 0 2px 10px rgba(33, 37, 41, 0.06);
-}
-[data-theme="dark"] {
-  --rv-bg: #121417;
-  --rv-surface: #1a1d22;
-  --rv-border: #2a2d33;
-  --rv-text: #d8dade;
-  --rv-muted: #9a9fa8;
-  --rv-accent: #6fd694;
-  --rv-accent-dark: #55c278;
-  --rv-chip: #1f2a24;
-  --rv-chip-border: #2f4a3a;
-  --rv-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
-}
+/* Video Reviews page (/reviews/). Reuses the main site's styles.css (fonts, Bootstrap base, theme
+   toggle) but has no sidebar, so the sidebar padding from styles.css is cancelled here. Shared review
+   pieces (tokens, rating, rich text, spoilers, reader overlay) live in review-reader.css. */
 
 html body {
   padding: 0;
@@ -81,17 +58,7 @@ html body {
   opacity: 0.85;
 }
 
-/* Buttons and inputs */
-.rv-btn {
-  border: 2px solid var(--rv-accent);
-  background: var(--rv-surface);
-  color: var(--rv-accent-dark);
-  border-radius: 999px;
-  padding: 0.35rem 1rem;
-  font-weight: 700;
-  font-size: 0.9rem;
-  cursor: pointer;
-}
+/* Buttons and inputs (base .rv-btn is in review-reader.css) */
 .rv-header .rv-btn {
   border-color: rgba(255, 255, 255, 0.6);
   background: rgba(255, 255, 255, 0.15);
@@ -110,14 +77,7 @@ html body {
   border-color: #dc3545;
   color: #dc3545;
 }
-.rv-btn-small {
-  padding: 0.15rem 0.75rem;
-  font-size: 0.8rem;
-}
-.rv-btn:focus-visible,
-.rv-input:focus-visible,
-.rv-chip:focus-visible,
-.rv-thumb:focus-visible {
+.rv-input:focus-visible {
   outline: 3px solid var(--rv-accent);
   outline-offset: 2px;
 }
@@ -141,32 +101,16 @@ html body {
   width: auto;
   flex: 0 0 auto;
 }
-.rv-tag-filter,
-.rv-card-tags {
+.rv-tag-filter {
   display: flex;
   flex-wrap: wrap;
   gap: 0.35rem;
-}
-.rv-tag-filter {
   margin-bottom: 0.75rem;
-}
-.rv-chip {
-  border: 1px solid var(--rv-chip-border);
-  background: var(--rv-chip);
-  color: var(--rv-text);
-  border-radius: 999px;
-  padding: 0.15rem 0.7rem;
-  font-size: 0.8rem;
-  cursor: pointer;
 }
 .rv-chip-active {
   background: var(--rv-accent);
   border-color: var(--rv-accent);
   color: #fff;
-}
-.rv-chip-small {
-  font-size: 0.72rem;
-  padding: 0.05rem 0.55rem;
 }
 .rv-status {
   color: var(--rv-muted);
@@ -189,99 +133,11 @@ html body {
   border-radius: 0.9rem;
   overflow: hidden;
   box-shadow: var(--rv-shadow);
-}
-.rv-card {
   scroll-margin-top: 1rem;
   transition: box-shadow 0.3s ease;
 }
 .rv-highlight {
   box-shadow: 0 0 0 3px var(--rv-accent), var(--rv-shadow);
-}
-.rv-thumb {
-  position: relative;
-  display: block;
-  width: 100%;
-  aspect-ratio: 16 / 9;
-  padding: 0;
-  border: 0;
-  background: #000;
-  cursor: pointer;
-}
-.rv-thumb img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-  transition: opacity 0.15s ease;
-}
-.rv-thumb:hover img {
-  opacity: 0.85;
-}
-/* Reader: the full review in an overlay window ("Read more") */
-.rv-dialog.rv-reader {
-  padding: 0;
-  width: min(50rem, calc(100vw - 32px));
-  max-height: calc(100vh - 48px);
-  overflow-y: auto;
-}
-.rv-reader-close {
-  position: sticky;
-  top: 0.6rem;
-  float: right;
-  margin: 0.6rem 0.6rem -3rem 0;
-  z-index: 2;
-  width: 2.4rem;
-  height: 2.4rem;
-  border-radius: 50%;
-  border: 0;
-  background: rgba(0, 0, 0, 0.6);
-  color: #fff;
-  font-size: 1.4rem;
-  line-height: 1;
-  cursor: pointer;
-}
-.rv-reader-close:hover {
-  background: rgba(0, 0, 0, 0.8);
-}
-.rv-reader-body {
-  padding: 1.1rem 1.4rem 1.5rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.6rem;
-}
-.rv-reader-title {
-  margin: 0;
-  font-family: "Muli", sans-serif;
-  text-transform: none;
-  font-size: 1.35rem;
-  line-height: 1.3;
-}
-.rv-reader .rv-rich,
-.rv-reader .rv-text {
-  font-size: 1rem;
-  line-height: 1.6;
-}
-body.rv-noscroll {
-  overflow: hidden;
-}
-@media (max-width: 540px) {
-  .rv-dialog.rv-reader {
-    width: 100vw;
-    max-width: 100vw;
-    max-height: 100vh;
-    height: 100vh;
-    border-radius: 0;
-    margin: 0;
-  }
-  .rv-reader-body {
-    padding: 1rem;
-  }
-}
-.rv-player {
-  width: 100%;
-  aspect-ratio: 16 / 9;
-  border: 0;
-  display: block;
 }
 .rv-body {
   padding: 0.9rem 1rem 1rem;
@@ -290,86 +146,11 @@ body.rv-noscroll {
   gap: 0.45rem;
   flex: 1;
 }
-.rv-card-head {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 0.6rem;
-}
-.rv-card-title {
-  color: var(--rv-text);
-  font-weight: 800;
-  line-height: 1.3;
-  text-decoration: none;
-}
-.rv-card-title:hover {
-  color: var(--rv-accent-dark);
-  text-decoration: underline;
-}
-.rv-rating {
-  flex: 0 0 auto;
-  font-weight: 800;
-  font-size: 1.15rem;
-  line-height: 1.2;
-  padding: 0.25rem 0.7rem;
-  border-radius: 0.6rem;
-  color: #fff;
-}
-.rv-rating-great { background: #2f9e5a; }
-.rv-rating-good  { background: #3b82c4; }
-.rv-rating-ok    { background: #c98516; }
-.rv-rating-low   { background: #c0392b; }
-.rv-meta {
-  color: var(--rv-muted);
-  font-size: 0.8rem;
-}
-.rv-text {
-  margin: 0;
-  white-space: pre-line;
-  font-size: 0.92rem;
-  color: var(--rv-text);
-}
 .rv-clamped {
   display: -webkit-box;
   -webkit-line-clamp: 5;
   -webkit-box-orient: vertical;
   overflow: hidden;
-}
-/* Formatted (rich text) reviews: Quill's .ql-editor styles give lists/indents/quotes,
-   these overrides make it sit like normal card text. */
-.rv-body .rv-rich {
-  padding: 0;
-  height: auto;
-  overflow: visible;
-  font-family: inherit;
-  font-size: 0.92rem;
-  line-height: 1.5;
-  color: var(--rv-text);
-  cursor: auto;
-}
-.rv-rich p,
-.rv-rich ol,
-.rv-rich ul {
-  margin: 0 0 0.5rem;
-}
-.rv-rich h2,
-.rv-rich h3 {
-  font-family: "Muli", sans-serif;
-  text-transform: none;
-  color: var(--rv-text);
-  margin: 0.6rem 0 0.35rem;
-}
-.rv-rich h2 { font-size: 1.15rem; font-weight: 800; }
-.rv-rich h3 { font-size: 1rem; font-weight: 800; }
-.rv-rich blockquote {
-  border-left: 4px solid var(--rv-accent);
-  padding-left: 0.75rem;
-  margin: 0.5rem 0;
-  color: var(--rv-muted);
-}
-.rv-rich a {
-  color: var(--rv-accent-dark);
-  text-decoration: underline;
 }
 .rv-body .rv-rich.rv-clamped {
   display: block;
@@ -378,59 +159,22 @@ body.rv-noscroll {
   -webkit-mask-image: linear-gradient(to bottom, #000 60%, transparent);
   mask-image: linear-gradient(to bottom, #000 60%, transparent);
 }
-
-/* Inline spoilers: blacked out on the page until clicked; dashed underline in the editor so you can see them */
-.rv-rich .ql-spoiler {
-  background: var(--rv-text);
-  color: transparent;
-  border-radius: 0.25rem;
-  padding: 0 0.15rem;
-  cursor: pointer;
-  user-select: none;
-  transition: background 0.2s ease, color 0.2s ease;
-}
-.rv-rich .ql-spoiler a {
-  color: transparent;
-  pointer-events: none;
-}
-.rv-rich .ql-spoiler.rv-revealed {
-  background: var(--rv-chip);
-  color: inherit;
-  user-select: text;
-}
-.rv-rich .ql-spoiler.rv-revealed a {
+.rv-more {
+  align-self: flex-start;
+  border: 0;
+  background: none;
   color: var(--rv-accent-dark);
-  pointer-events: auto;
-}
-.rv-rich .ql-spoiler:focus-visible {
-  outline: 3px solid var(--rv-accent);
-  outline-offset: 1px;
-}
-.rv-rich-editor .ql-spoiler {
-  background: var(--rv-chip);
-  color: inherit;
-  padding: 0;
-  border-bottom: 2px dashed #c98516;
-}
-
-/* Whole-review spoiler cover */
-.rv-spoiler-hidden > :not(.rv-spoiler-cover) {
-  display: none !important;
-}
-.rv-spoiler-cover {
-  width: 100%;
-  padding: 0.8rem 0.9rem;
-  border: 2px dashed #c98516;
-  border-radius: 0.6rem;
-  background: rgba(242, 169, 59, 0.12);
-  color: var(--rv-text);
   font-weight: 700;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
+  padding: 0;
   cursor: pointer;
 }
-.rv-spoiler-cover:hover {
-  background: rgba(242, 169, 59, 0.22);
+.rv-edit {
+  align-self: flex-end;
+  margin-top: auto;
 }
+
+/* Editor (Quill "snow" theme) in the add/edit dialog */
 .rv-check {
   display: flex !important;
   align-items: center;
@@ -441,13 +185,6 @@ body.rv-noscroll {
   font-weight: 400;
   color: var(--rv-muted);
 }
-
-/* First-line paragraph indent (editor and published reviews) */
-.ql-editor .ql-firstline-1 {
-  text-indent: 2em;
-}
-
-/* Editor (Quill "snow" theme) in the add/edit dialog */
 .rv-field {
   margin-bottom: 0.7rem;
 }
@@ -469,6 +206,12 @@ body.rv-noscroll {
   font-size: 0.95rem;
   background: var(--rv-surface);
   color: var(--rv-text);
+}
+.rv-rich-editor .ql-spoiler {
+  background: var(--rv-chip);
+  color: inherit;
+  padding: 0;
+  border-bottom: 2px dashed #c98516;
 }
 .rv-dialog .ql-toolbar.ql-snow,
 .rv-dialog .ql-container.ql-snow {
@@ -509,36 +252,9 @@ body.rv-noscroll {
   z-index: 5;
 }
 
-.rv-more {
-  align-self: flex-start;
-  border: 0;
-  background: none;
-  color: var(--rv-accent-dark);
-  font-weight: 700;
-  font-size: 0.85rem;
-  padding: 0;
-  cursor: pointer;
-}
-.rv-edit {
-  align-self: flex-end;
-  margin-top: auto;
-}
-
-/* Dialogs */
-.rv-dialog {
-  border: 1px solid var(--rv-border);
-  border-radius: 1rem;
-  background: var(--rv-surface);
-  color: var(--rv-text);
-  padding: 1.25rem 1.4rem;
-  width: min(26rem, calc(100vw - 32px));
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-}
+/* Form dialogs (log in, add/edit) */
 .rv-dialog-wide {
   width: min(40rem, calc(100vw - 32px));
-}
-.rv-dialog::backdrop {
-  background: rgba(0, 0, 0, 0.45);
 }
 .rv-dialog h2 {
   font-size: 1.8rem;
