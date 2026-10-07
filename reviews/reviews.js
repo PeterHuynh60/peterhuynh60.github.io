@@ -265,17 +265,15 @@
         });
     }
 
-    function renderCard(r) {
-        var card = el("article", "rv-card");
-        card.id = "r-" + r.id; // linked from the main site's preview, e.g. /reviews/#r-<id>
+    // ---------- building blocks shared by cards and the reader ----------
 
-        // Thumbnail; the YouTube player only loads when clicked (faster page, no tracking until then).
+    // Thumbnail; the YouTube player only loads when clicked (faster page, no tracking until then).
+    function makeThumb(r) {
         var thumb = el("button", "rv-thumb");
         thumb.type = "button";
         thumb.setAttribute("aria-label", "Play " + r.title);
         var img = el("img"); img.src = thumbUrl(r.videoId); img.alt = ""; img.loading = "lazy";
         thumb.appendChild(img);
-        thumb.appendChild(el("span", "rv-play", "▶"));
         thumb.addEventListener("click", function () {
             var frame = document.createElement("iframe");
             frame.className = "rv-player";
@@ -285,65 +283,90 @@
             frame.allowFullscreen = true;
             thumb.replaceWith(frame);
         });
-        card.appendChild(thumb);
+        return thumb;
+    }
 
-        var body = el("div", "rv-body");
+    function makeHead(r, tag) {
+        var frag = document.createDocumentFragment();
         var head = el("div", "rv-card-head");
         var title = el("a", "rv-card-title", r.title);
         title.href = watchUrl(r.videoId); title.target = "_blank"; title.rel = "noopener noreferrer";
-        head.appendChild(title);
+        if (tag) { var h = el(tag, "rv-reader-title"); h.appendChild(title); head.appendChild(h); } else head.appendChild(title);
         head.appendChild(el("span", "rv-rating " + ratingClass(r.rating), (+r.rating).toString().replace(/\.0$/, "") + "/10"));
-        body.appendChild(head);
-
+        frag.appendChild(head);
         var meta = [r.channel, formatDate(r.watchedOn) ? "Watched " + formatDate(r.watchedOn) : ""].filter(Boolean).join(" · ");
-        if (meta) body.appendChild(el("div", "rv-meta", meta));
+        if (meta) frag.appendChild(el("div", "rv-meta", meta));
+        return frag;
+    }
+
+    function makeReviewText(r) {
+        var text;
+        if (r.reviewHtml && hasPurify) {
+            // Formatted review: sanitized HTML inside Quill's own styling (lists, indents, quotes).
+            text = el("div", "ql-editor rv-rich");
+            text.innerHTML = sanitize(r.reviewHtml);
+            activateInlineSpoilers(text);
+        } else {
+            // Plain-text review, or the sanitizer failed to load: show the plain copy (never raw HTML).
+            text = el("p", "rv-text", r.review || "");
+        }
+        return text;
+    }
+
+    // Whole-review spoiler flag: content sits behind a click-to-reveal cover until revealed.
+    function spoilerHolder(parent, r, revealed) {
+        if (!r.spoiler || revealed) return parent;
+        var holder = el("div", "rv-spoiler-wrap rv-spoiler-hidden");
+        var cover = el("button", "rv-spoiler-cover", "\u26A0 This review contains spoilers \u2014 click to reveal");
+        cover.type = "button";
+        cover.addEventListener("click", function () { holder.classList.remove("rv-spoiler-hidden"); cover.remove(); });
+        holder.appendChild(cover);
+        parent.appendChild(holder);
+        return holder;
+    }
+
+    function makeTags(r) {
+        var tags = tagsOf(r);
+        if (!tags.length) return null;
+        var tagWrap = el("div", "rv-card-tags");
+        tags.forEach(function (t) {
+            var chip = el("button", "rv-chip rv-chip-small", t);
+            chip.type = "button";
+            chip.addEventListener("click", function () {
+                if ($("rv-reader").open) $("rv-reader").close();
+                activeTag = t; render(); window.scrollTo({ top: 0, behavior: "smooth" });
+            });
+            tagWrap.appendChild(chip);
+        });
+        return tagWrap;
+    }
+
+    function renderCard(r) {
+        var card = el("article", "rv-card");
+        card.id = "r-" + r.id; // linked from the main site's preview, e.g. /reviews/#r-<id>
+        card.appendChild(makeThumb(r));
+
+        var body = el("div", "rv-body");
+        body.appendChild(makeHead(r));
 
         if (r.review || r.reviewHtml) {
-            // Whole-review spoiler flag: the write-up sits behind a click-to-reveal cover.
-            var holder = body;
-            if (r.spoiler) {
-                holder = el("div", "rv-spoiler-wrap rv-spoiler-hidden");
-                var cover = el("button", "rv-spoiler-cover", "⚠ This review contains spoilers — click to reveal");
-                cover.type = "button";
-                cover.addEventListener("click", function () { holder.classList.remove("rv-spoiler-hidden"); cover.remove(); });
-                holder.appendChild(cover);
-                body.appendChild(holder);
-            }
-            var text;
-            if (r.reviewHtml && hasPurify) {
-                // Formatted review: sanitized HTML inside Quill's own styling (lists, indents, quotes).
-                text = el("div", "ql-editor rv-rich");
-                text.innerHTML = sanitize(r.reviewHtml);
-                activateInlineSpoilers(text);
-            } else {
-                // Plain-text review, or the sanitizer failed to load: show the plain copy (never raw HTML).
-                text = el("p", "rv-text", r.review || "");
-            }
+            var holder = spoilerHolder(body, r, false);
+            var text = makeReviewText(r);
             holder.appendChild(text);
             var plain = r.review || text.textContent;
             if (plain.length > 320 || plain.split("\n").length > 5) {
                 text.classList.add("rv-clamped");
                 var more = el("button", "rv-more", "Read more");
                 more.type = "button";
-                more.addEventListener("click", function () {
-                    var open = text.classList.toggle("rv-clamped");
-                    more.textContent = open ? "Read more" : "Show less";
-                });
+                // Opens the full review in the reader; if the card's spoiler cover was already
+                // clicked, the reader doesn't ask again.
+                more.addEventListener("click", function () { openReader(r, !holder.classList.contains("rv-spoiler-hidden")); });
                 holder.appendChild(more);
             }
         }
 
-        var tags = tagsOf(r);
-        if (tags.length) {
-            var tagWrap = el("div", "rv-card-tags");
-            tags.forEach(function (t) {
-                var chip = el("button", "rv-chip rv-chip-small", t);
-                chip.type = "button";
-                chip.addEventListener("click", function () { activeTag = t; render(); window.scrollTo({ top: 0, behavior: "smooth" }); });
-                tagWrap.appendChild(chip);
-            });
-            body.appendChild(tagWrap);
-        }
+        var tags = makeTags(r);
+        if (tags) body.appendChild(tags);
 
         if (isOwner()) {
             var edit = el("button", "rv-btn rv-btn-small rv-edit", "Edit");
@@ -354,6 +377,31 @@
 
         card.appendChild(body);
         return card;
+    }
+
+    // ---------- reader (full review over the page) ----------
+
+    function openReader(r, revealed) {
+        var content = $("rv-reader-content");
+        content.textContent = "";
+        content.appendChild(makeThumb(r));
+        var body = el("div", "rv-reader-body");
+        body.appendChild(makeHead(r, "h2"));
+        var tags = makeTags(r);
+        if (tags) body.appendChild(tags);
+        if (r.review || r.reviewHtml) spoilerHolder(body, r, revealed).appendChild(makeReviewText(r));
+        if (isOwner()) {
+            var edit = el("button", "rv-btn rv-btn-small", "Edit");
+            edit.type = "button";
+            edit.addEventListener("click", function () { $("rv-reader").close(); openEditor(r); });
+            body.appendChild(edit);
+        }
+        content.appendChild(body);
+        if (location.hash !== "#r-" + r.id) history.replaceState(null, "", "#r-" + r.id); // shareable link
+        document.body.classList.add("rv-noscroll");
+        $("rv-reader").showModal();
+        $("rv-reader").scrollTop = 0;
+        $("rv-reader-close").focus();
     }
 
     function render() {
@@ -367,19 +415,32 @@
         else statusEl.textContent = list.length === reviews.length ? reviews.length + (reviews.length === 1 ? " review" : " reviews") : "Showing " + list.length + " of " + reviews.length;
     }
 
-    // Arriving via /reviews/#r-<id>: scroll to that card, open its full text and highlight it briefly.
+    // Arriving via /reviews/#r-<id> (e.g. from the main page): open that review in the reader.
+    // Spoiler-flagged reviews still show their cover first.
     var linkedDone = false;
     function focusLinkedReview() {
         if (linkedDone || !/^#r-[a-z0-9]+$/.test(location.hash)) return;
         linkedDone = true;
-        var card = document.getElementById(location.hash.slice(1));
-        if (!card) return;
-        var more = card.querySelector(".rv-more");
-        if (more) more.click();
-        card.classList.add("rv-highlight");
-        card.scrollIntoView({ behavior: "smooth", block: "start" });
-        setTimeout(function () { card.classList.remove("rv-highlight"); }, 2500);
+        var id = location.hash.slice(3);
+        var r = reviews.filter(function (x) { return x.id === id; })[0];
+        var card = document.getElementById("r-" + id);
+        if (card) {
+            card.scrollIntoView({ block: "start" });
+            card.classList.add("rv-highlight");
+            setTimeout(function () { card.classList.remove("rv-highlight"); }, 2500);
+        }
+        if (r) openReader(r, false);
     }
+
+    // Closing the reader: stop any playing video, unlock scrolling, drop the review from the address.
+    var reader = $("rv-reader");
+    $("rv-reader-close").addEventListener("click", function () { reader.close(); });
+    reader.addEventListener("click", function (e) { if (e.target === reader) reader.close(); }); // click outside the content
+    reader.addEventListener("close", function () {
+        $("rv-reader-content").textContent = "";
+        document.body.classList.remove("rv-noscroll");
+        if (/^#r-/.test(location.hash)) history.replaceState(null, "", location.pathname + location.search);
+    });
 
     function load() {
         return pb.collection("video_reviews").getFullList({ sort: "-created" })

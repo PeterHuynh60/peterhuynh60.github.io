@@ -61,6 +61,12 @@
         <div id="rv-grid" class="rv-grid"></div>
     </main>
 
+    <!-- Reader: full review over the page (opened by "Read more" or a /reviews/#r-<id> link) -->
+    <dialog id="rv-reader" class="rv-dialog rv-reader" aria-label="Full review">
+        <button id="rv-reader-close" class="rv-reader-close" type="button" aria-label="Close">&times;</button>
+        <div id="rv-reader-content"></div>
+    </dialog>
+
     <!-- Log in -->
     <dialog id="rv-login" class="rv-dialog">
         <form id="rv-login-form" method="dialog">
