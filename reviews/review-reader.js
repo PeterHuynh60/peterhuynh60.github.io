@@ -113,7 +113,7 @@
     function spoilerHolder(parent, r, revealed) {
         if (!r.spoiler || revealed) return parent;
         var holder = el("div", "rv-spoiler-wrap rv-spoiler-hidden");
-        var cover = el("button", "rv-spoiler-cover", "⚠ This review contains spoilers — click to reveal");
+        var cover = el("button", "rv-spoiler-cover", "Spoiler warning — click to reveal this review");
         cover.type = "button";
         cover.addEventListener("click", function () { holder.classList.remove("rv-spoiler-hidden"); cover.remove(); });
         holder.appendChild(cover);

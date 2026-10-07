@@ -62,8 +62,8 @@
                 <li class="nav-item"><a class="nav-link js-scroll-trigger" href="#education">Education</a></li>
                 <li class="nav-item">
                     <button id="theme-toggle" class="theme-toggle-btn" type="button" data-hu-theme-toggle aria-label="Toggle dark mode" title="Toggle dark mode">
-                        <span class="theme-toggle-icon-light">🌙</span>
-                        <span class="theme-toggle-icon-dark">☀️</span>
+                        <span class="theme-toggle-icon-light"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"/></svg></span>
+                        <span class="theme-toggle-icon-dark"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></span>
                     </button>
                 </li>
             </ul>
@@ -355,7 +355,7 @@
                     <!-- Case studies -->
                     <div class="case-studies">
                         <div class="case-study">
-                            <div class="case-head"><span class="case-icon" aria-hidden="true">☁️</span><h4>Leaving Firebase for a self-hosted stack</h4></div>
+                            <div class="case-head"><h4>Leaving Firebase for a self-hosted stack</h4></div>
                             <div class="case-stat">3 dashboards moved onto hardware I own</div>
                             <div class="case-label">The problem</div>
                             <p>The dashboards depended on Firebase (Firestore, Auth, Cloud Functions) and GitHub Pages, tying them to third-party services, quotas and pricing.</p>
@@ -366,7 +366,7 @@
                             <div class="case-tags"><span>PocketBase</span><span>Node.js</span><span>Docker</span><span>Nginx</span><span>Data migration</span></div>
                         </div>
                         <div class="case-study">
-                            <div class="case-head"><span class="case-icon" aria-hidden="true">⛏️</span><h4>Taming a 200+ mod Minecraft server</h4></div>
+                            <div class="case-head"><h4>Taming a 200+ mod Minecraft server</h4></div>
                             <div class="case-stat">213 mods, one stable server</div>
                             <div class="case-label">The problem</div>
                             <p>Friends wanted a heavily modded Create: Aeronautics pack. Out of the box it wouldn't start: the container shipped the wrong Java version, files had the wrong owner, and the world crashed on startup.</p>
@@ -663,7 +663,7 @@
                     body.appendChild(el("div", "rp-title", r.title));
                     if (r.channel) body.appendChild(el("div", "rp-channel", r.channel));
                     // Spoiler-flagged reviews never show a snippet here; inline spoilers are already masked in r.review.
-                    if (r.spoiler) body.appendChild(el("p", "rp-snippet rp-spoiler-note", "⚠ Contains spoilers — open to read"));
+                    if (r.spoiler) body.appendChild(el("p", "rp-snippet rp-spoiler-note", "Contains spoilers — open to read"));
                     else if (r.review) body.appendChild(el("p", "rp-snippet", r.review.replace(/\s+/g, " ").trim()));
                     card.appendChild(body);
                     col.appendChild(card);
@@ -732,21 +732,23 @@
                 card.href = "https://home.huynh.place"; card.target = "_blank"; card.rel = "noopener noreferrer";
 
                 var thumb = el("div", "rp-thumb");
-                var showIcon = function (glyph) { thumb.classList.add("rp-thumb-icon"); thumb.insertBefore(el("span", "rp-thumb-glyph", glyph), thumb.firstChild); };
-                if (h.masked || !h.photoUrl) showIcon(isBought ? "\uD83C\uDFE1" : "\uD83D\uDD12");
+                // Line icons for homes without a photo (constant markup, no listing data inside).
+                var ICONS = { house: '<svg viewBox="0 0 24 24" width="44" height="44" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M10 21v-6h4v6"/></svg>', lock: '<svg viewBox="0 0 24 24" width="44" height="44" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>' };
+                var showIcon = function (name) { thumb.classList.add("rp-thumb-icon"); var g = el("span", "rp-thumb-glyph"); g.innerHTML = ICONS[name]; thumb.insertBefore(g, thumb.firstChild); };
+                if (h.masked || !h.photoUrl) showIcon(isBought ? "house" : "lock");
                 else {
                     var img = el("img"); img.alt = ""; img.loading = "lazy"; img.src = h.photoUrl;
-                    img.addEventListener("error", function () { img.remove(); showIcon("\uD83C\uDFE0"); });
+                    img.addEventListener("error", function () { img.remove(); showIcon("house"); });
                     thumb.appendChild(img);
                 }
-                thumb.appendChild(el("span", "rp-rating " + statusClass[status], isBought ? "\uD83C\uDFE1 Bought" : status));
+                thumb.appendChild(el("span", "rp-rating " + statusClass[status], isBought ? "Bought" : status));
                 card.appendChild(thumb);
 
                 var body = el("div", "rp-body");
                 body.appendChild(el("div", "rp-title", isBought ? "Our Home" : h.masked ? "Private listing" : h.address));
                 body.appendChild(el("div", "rp-channel", [h.city, h.neighborhood].filter(Boolean).join(" \u00B7 ")));
                 body.appendChild(el("div", "rp-price", "$" + Number(h.price || 0).toLocaleString()));
-                if (h.masked) body.appendChild(el("div", "rp-note", "\uD83D\uDD12 Address hidden for privacy"));
+                if (h.masked) body.appendChild(el("div", "rp-note", "Address hidden for privacy"));
                 card.appendChild(body);
                 col.appendChild(card);
                 previewRow.appendChild(col);

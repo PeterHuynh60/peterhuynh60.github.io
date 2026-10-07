@@ -10507,9 +10507,14 @@ section.resume-section .resume-section-content {
   justify-content: center;
   background: linear-gradient(135deg, #e8f5ee 0%, #d4ecdf 100%);
 }
+/* Line icon (house / lock) for homes without a photo */
 .rp-thumb-glyph {
-  font-size: 3rem;
-  line-height: 1;
+  display: flex;
+  color: #48a869;
+  opacity: 0.8;
+}
+[data-theme="dark"] .rp-thumb-glyph {
+  color: #6fd694;
 }
 /* Corner badge: rating (reviews) or status (homes) */
 .rp-rating {
@@ -10723,11 +10728,17 @@ section.resume-section .resume-section-content {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  font-size: 18px;
+  color: #fff;
   line-height: 1;
   padding: 0;
   margin: 0.5rem 0;
   transition: background 0.2s ease;
+}
+/* Moon / sun line icons (same as the apps' header toggle) */
+.theme-toggle-btn svg {
+  width: 18px;
+  height: 18px;
+  display: block;
 }
 .theme-toggle-btn:hover {
   background: rgba(255, 255, 255, 0.28);
