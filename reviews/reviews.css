@@ -8,7 +8,7 @@ html body {
   color: var(--rv-text);
 }
 .rv-wrap {
-  max-width: 72rem;
+  max-width: 80rem;
   margin: 0 auto;
   padding: 0 16px;
 }
@@ -119,11 +119,40 @@ html body {
 }
 
 /* Review grid and cards */
+/* 4 x 4 grid on desktop (16 reviews per page), 3 / 2 / 1 columns on smaller screens */
 .rv-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 20rem), 1fr));
-  gap: 1.25rem;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1.1rem;
+  padding-bottom: 1.5rem;
+}
+@media (max-width: 1199px) {
+  .rv-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (max-width: 899px) {
+  .rv-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 575px) {
+  .rv-grid { grid-template-columns: 1fr; }
+}
+.rv-grid {
+  scroll-margin-top: 1rem;
+}
+.rv-pager {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
   padding-bottom: 3rem;
+  color: var(--rv-muted);
+  font-size: 0.9rem;
+}
+.rv-pager[hidden] {
+  display: none;
+}
+.rv-pager .rv-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
 }
 .rv-card {
   display: flex;

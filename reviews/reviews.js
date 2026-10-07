@@ -8,6 +8,8 @@
     var pb = new PocketBase("https://data.huynh.place");
     var reviews = [];
     var activeTag = null;
+    var PAGE_SIZE = 16; // 4 x 4 grid on desktop
+    var page = 1;
     var editing = null; // record being edited, or null for a new review
     var autoFilled = { title: "", channel: "" };
 
@@ -212,12 +214,12 @@
         [null].concat(tags).forEach(function (t) {
             var b = el("button", "rv-chip" + (activeTag === t ? " rv-chip-active" : ""), t == null ? "All" : t + " (" + counts[t] + ")");
             b.type = "button";
-            b.addEventListener("click", function () { activeTag = t; render(); });
+            b.addEventListener("click", function () { activeTag = t; page = 1; render(); });
             tagBar.appendChild(b);
         });
     }
 
-    function onTagClick(t) { activeTag = t; render(); window.scrollTo({ top: 0, behavior: "smooth" }); }
+    function onTagClick(t) { activeTag = t; page = 1; render(); window.scrollTo({ top: 0, behavior: "smooth" }); }
     function makeTags(r) { return RR.makeTags(r, onTagClick); }
 
     function renderCard(r) {
@@ -267,12 +269,32 @@
         renderTagBar();
         var q = $("rv-search").value.trim().toLowerCase();
         var list = sorted(reviews.filter(function (r) { return matches(r, q); }));
+        var pages = Math.max(1, Math.ceil(list.length / PAGE_SIZE));
+        if (page > pages) page = pages;
+        var first = (page - 1) * PAGE_SIZE;
+        var shown = list.slice(first, first + PAGE_SIZE);
         grid.textContent = "";
-        list.forEach(function (r) { grid.appendChild(renderCard(r)); });
+        shown.forEach(function (r) { grid.appendChild(renderCard(r)); });
+
+        var pager = $("rv-pager");
+        pager.hidden = pages < 2;
+        $("rv-page-label").textContent = "Page " + page + " of " + pages;
+        $("rv-prev").disabled = page <= 1;
+        $("rv-next").disabled = page >= pages;
+        var filtered = list.length !== reviews.length;
         if (!reviews.length) statusEl.textContent = isOwner() ? "No reviews yet. Click “+ New review” to add your first." : "No reviews yet. Check back soon!";
         else if (!list.length) statusEl.textContent = "No reviews match your search.";
-        else statusEl.textContent = list.length === reviews.length ? reviews.length + (reviews.length === 1 ? " review" : " reviews") : "Showing " + list.length + " of " + reviews.length;
+        else if (pages > 1) statusEl.textContent = "Showing " + (first + 1) + "–" + (first + shown.length) + " of " + list.length + (filtered ? " matching" : "") + " reviews";
+        else statusEl.textContent = filtered ? "Showing " + list.length + " of " + reviews.length : reviews.length + (reviews.length === 1 ? " review" : " reviews");
     }
+
+    function goToPage(p) {
+        page = p;
+        render();
+        grid.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+    $("rv-prev").addEventListener("click", function () { goToPage(page - 1); });
+    $("rv-next").addEventListener("click", function () { goToPage(page + 1); });
 
     // Arriving via /reviews/#r-<id> (e.g. from the main page): open that review in the reader.
     // Spoiler-flagged reviews still show their cover first.
@@ -427,8 +449,9 @@
 
     // ---------- toolbar + theme ----------
 
-    $("rv-search").addEventListener("input", render);
-    $("rv-sort").addEventListener("change", render);
+    // Changing the search, sort or tag filter starts again from page 1.
+    $("rv-search").addEventListener("input", function () { page = 1; render(); });
+    $("rv-sort").addEventListener("change", function () { page = 1; render(); });
 
     $("theme-toggle").addEventListener("click", function () {
         var isDark = document.documentElement.getAttribute("data-theme") === "dark";
